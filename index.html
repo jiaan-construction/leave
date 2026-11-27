@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
-<title>JIA AN 休息与替班</title>
+<title>JIA AN 司机调度</title>
 <style>
 /* 沿用工地导航的 JIA AN 视觉规范：品牌红只用于动作与标识 */
 :root{--brand:#E9272C;--ground:#F6F7F9;--surface:#fff;--surface-2:#F1F3F6;--ink:#111;--ink-soft:#5E6367;--ink-faint:#8C9296;
@@ -43,6 +43,24 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .gate{margin-top:20px;display:flex;flex-direction:column;gap:10px}
 .btn{min-height:52px;border:0;border-radius:12px;background:var(--brand);color:#fff;font:600 17px var(--sans);cursor:pointer}
 .msg{color:var(--brand);min-height:1.4em;margin:0}
+.tabs{display:flex;gap:3px;padding:3px;background:var(--surface-2);border:1px solid var(--rule);border-radius:11px}
+.badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:10px;background:var(--brand);color:#fff;font-size:12px;line-height:20px}
+.daybar{display:flex;align-items:center;gap:8px}
+.daybar button{width:52px;height:44px;border:1px solid var(--rule);border-radius:11px;background:var(--surface);color:var(--ink);font:600 20px var(--sans);cursor:pointer}
+.daybar button:disabled{opacity:.3}
+.daybar strong{flex:1;text-align:center}
+.site{background:var(--surface);border:1px solid var(--rule);border-radius:14px;box-shadow:var(--shadow);margin-top:10px;overflow:hidden}
+.site h3{margin:0;padding:10px 14px;font-size:17px;display:flex;justify-content:space-between;gap:8px;background:var(--surface-2)}
+.site h3 span{font-size:13px;font-weight:400;color:var(--ink-faint)}
+.slot{display:flex;align-items:baseline;gap:10px;padding:9px 14px;border-top:1px solid var(--rule-soft)}
+.tc{flex:none;width:76px;font-weight:600;font-size:15px}
+.nm{flex:1;min-width:0;overflow-wrap:anywhere}
+.nm small{color:var(--ink-faint);margin-left:6px}
+.st{flex:none;font-size:13px;color:var(--ink-faint)}
+.slot.gap{background:color-mix(in srgb,var(--brand) 9%,transparent)}
+.slot.gap .st{color:var(--brand);font-weight:700}
+.slot.open .st,.slot.cover .st{color:var(--pending);font-weight:600}
+.slot.rest .nm,.slot.none .nm{color:var(--ink-faint)}
 .empty,.foot{color:var(--ink-faint);font-size:14px;text-align:center;margin-top:24px}
 .toast{position:fixed;left:16px;right:16px;bottom:16px;background:var(--ink);color:var(--ground);border-radius:12px;padding:12px 14px;font-size:15px;text-align:center}
 </style>
@@ -50,18 +68,21 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 <body>
 <div class="wrap">
   <header class="masthead"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF4AAABgCAMAAACjfDWBAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAMAUExURUdwTOfv7Oby8eTt8BUVFfb29PH69sT/6+z29tf18/v19PPz7kNCQu/W2Pjv7O37+h4eHp6SlNLMzfvq6/Xe3ejBwzExMe7+/PLg4fP8+bSlp/m+v2hcXvrz8UpKSvB6ev7s6/vc399+gPXi5OZSVfng4PTQ0u7HyejJyfScmqmpqeLR0se/wJiYmPHCxvDW1cius9htcYWFhREREdzAxfvY1T8/P+pmatjIysTAwfz19Z2enulnZWxsbM5manBcXEtLTCgoKC8vL2FhYZuTlPC8vv707vKkpu+Rleva2/jCw/3Z3BgYGMmanrOdn5JFUenGyL9zed+jqO+KjXdychYWFm5qas+wtb2SmRUVFdZhaJuJicqoqvbY2PbPzu3g4ppTW8J+hElJSaVHTUBAQP3z8tK1udm/wNm8vmRkZO2jqPextMu3uwcHB8CNkqOdnde/wpuWl3x8erZkb5aSkoGBgf7e3P/g48mHiteYnfLAwzg4OPrMzv7h4oeHh9/U1d91fb5gZ/O7vciqrmtra+OIjdrBxnltb7uxsbGKj5Q3Qatqa7KanOaws8uTl319feavsD09PSQkJPJpZPZjZVpaWlxcXLCbnjc3N/uoquWbnNStrt+lqa6wr927u1xTU8NwcJOMjqt6fSsrK/OxtWpqauGxtPG/wfbJzzo6Ov328OyFiOfBwtpxeJyChMi2u7uZn7OBhNSdos6Mi9OepNWSmI6AgZ9cZK1eZbB0eP/08LNNUnl4efOoquaKjIuLi05OTo+EhVZWVjExMa9dX0FBQfRjYuqOk0NDQ7Q0OKVTWm02O917ffTFtr5MUgUEBJ0WIIcSHtgkLQsLC/BMTO1AQOQPEPZiYeweId0rLf2MjOAbI98zN9s7Pu03N+0qLORfYeypqngSHsMdJaEvN99DSOMhJtEaKY8aIzAwMPGKjM0yPqw4PUpKSsFGTK4dJMwqM780PulyccyTldNaYZgiLPBvbtRNVcF5fIkqNn40PPC1s8SHioAkL89ESncmMcC9uE8AAADPdFJOUwACBwX+FxIBCgM2DhMxHir9BixEWA7rPWsgDEYKTuf7dDb8KP6jiSB1/poUWC9ZeRn9ocWF5uv+2Dxbdp5Z/wGY886ZcKue7fxN/sLz7ib7rfTj4yrkwaX0NvQTxZL+Yfj71vv+hsPxbufA54Pt3kpQYh/oO1n40Lq2jmnYg2vY+/3L6E/voZhwy/35VXagZaSy6cnH0Ku4+8r9S5Jm1er9i+bZr/nt3LjVZ9TE32rvxepy/F7gfvLYwbb67dX9+E2/bcDve8XOP7yi4a7p1/ahAPMAAAq3SURBVGjetJl3WBPZFsAnmUkhMQUISBAMJfTu0pGlCkhvAiJIEVEBO6DykLVgw+4+e+9117q2dd/28r3yBdIgC4SAEprw0RbBsr5MEjBBSCaA949Abia/nDn39AEAxAukE0iOt9409r3NGhzMett3ojHcjUbAgMBULJBUEt83uHnRt5sH396/f9/M5fOulz1dm7N2HQi5gUVPjo02f7A+LuvCkw3XrKOtrKzIZLKVlYHFtUvr4zZ3db0yu+J2Az9hthbGccPdvqhTjgQ5A+fn5wf/QeHwurQD8aldL7s2XdpIR00ETtTdu6Iv6oABcRwFgERMyX9Te3pcQp00/wEt53spd9OcjFVfpW1y1aXnef936RQtjeh2S+9EnTLUAtSKpWVcuqmj2+V/uhK+LsJzAB23piSbIrzYPKTUrKdj0zpjkI7IVPG0B1H7vJDfKeFGSH5/96s8E0RWirLKXeFK1MR4vYkYy23dHe2WBPVHjIq+s9VUQzvAAeiQ/L+fe7jpqjthPeutyYQJmDGOclX0vDlfDV/P9crSCToh3fpf3fWhKvl6BXdWTdjJ6SZm7DpVfMOCJRmTiVAmf6ri67kuMZhUAKTfMGNL9AN+GrrERkMY7Pp8uzHpTpOmA3jjdR7s5i1jRCq/6DTrKUg+9FJmrcjtY7vVyS2YkuRGzqtnMxaPjg/aBZ7mU4IHdG0EgsZRnqm1Kk1naugAeqMLu1lZPVq6S1QpHkSDGuQj/NV6sYdy4tuePH40xZm7xhqQkeNR3mFittIG6bYK1UyPMBNdomigHkwEV6wUDHK348YWhG5i4r04XyhO0MglTBoVpUedvD3OvRP3MrhcprChLrVkusLCqDkJrBtTUfhY13GuJ30nFApr+NUMXvWfCuu4ExmnOv+GKpjNjKPjXUY6zmVU14m5oroaPr9WLKjl1woEYj47bJ2ahJauoIHYVSrwAyKbAZ4HY6C3t7fxjRlD1BjOGBB1hFlikBZMureNxscLeWEL2z2qeaLGhWFmjPbiRjMGI3yhh6AdKR+0Lxi3PjHPa+AzzfqZPH5Ng0DA54vhl5o6XgO/Ox5hvtfztB/fwR1thB4RCR7VQm67jXS18xqqb85OsGksQSY9ipQ8flGDo8+pZoaK6j24X2ZQpEv3Zu8pEppOoSCs4dDbPVU5YMlALZ/fwOR9OUNekm1pRHyqUvz5dFXli3n68YE6ZjX3n3K8ydU3muBxOp5WakrIsHqusGYYT9kSf1KTjqcwV40w5jebubyGYeWEnDCL1SDvaNuvVmdZs+t51VwZnhgS2tvbfs0UcbOg52mtFi9o4EqOFo4y2C39ot5X7U5YpHjDozS1+Lr6AS7DCTZfbF7YwuLwE9aI8UY71PZBs5tFzIbfpMrB5n1+bvBcH2I8inTUT73um+vkloOjuZW6lVpaIW65nTzVCaAnkb6aJzdMDIFOwSDvAsGlX6g9/NkNDR/cCm6aNbDLnUjwwmrubzMmUvNoB3+h9nRuNjOreQwnAoGopTH+65UqQwaZll7cXids4PcWr9toTJ5iPJq25JyLiCcU8pipa79xxWiuHNWW46ftbGABLxOSkRGImnrdT2ohsJxJTbKWen5SvNPWT4qf++OnxANGSXM/Jd5wl7XyVNFAsjIkBo6lzZXlVOf9vmtGfclr/34vWSFinmFgPDzHo2V8nIT1znyt+HaBT2dbW5v7HwC6fObP06Rbaw62+TsrO4PO4bYjDrAToIyf5WTLfhzlk3N2wRiWeVTRF8GV7lSItXw+gPedd1FWvRn6Qxd9lettYhKUUyQVFVcWwDm4RvqpLXRo2sdumbhVKTn4edmvzlm+H0SXH/osWrrh4M6C/JX6eJxDIIeV5CDTzkwOlBQN822p+tPGCIgprqPijH0njPed95n0asx5KosT6KsYLNH+kRBLf7W0dtSZyWFBP+qgYOnHwAOGO3JHV8ydEuWgy2V4sPAwdaY+VVH7uMLr0OEAKMkBJ8Mf47TZ6o2HRyfvIn4k/XyAbntMiieWtf1c5E+9XqTQEARFHvNJgjrLZXhoRzbnULn22MoBQFqK/RjSE8sCpHiHZdARHd+LkUEfYr1XIHQkcac79KuRDP+PxEDWzJWosfE4810P0aOkh2zxwHypclB/zIsMxjvD4g/3GGiJ8OVoTFDkxUSUDG9U4M5ZRlDCPx0RlrDnrpJZo1fmLC8DZXjQKwnKJoH4osC2IMxwlJoJ+TugwcRA6k9GcjzeNoCTpIRf90GVc1OSlc76IfVQIiDD2/kcgy4vc9fXj2Rly2tR1Cwq9Zlky53KOrtGjgfA85GcywpHi0lQyKe3Vkj7JNBrlg+GTnG9LLlTAOMD697hMIvFkSyIwwrYIdP+qusceAuCIBb00FCOB8AjkktG8JjSZoWzzNi1RxoQgiDq5e+/z2EFlGkB2GAJXvuHeZyAg0GzJCubmr0HPiLsjkiOvmxrGSfbASXHA8bPWB/w5DClkYWhNFjo+WRTOSwW5O4Lv5t/KHDamqC2wEJpPYn7IbDzPBy7og+3HSyUmUKRfo6vNmlZ20/SvtX+LLVzGF/SXCPTO4gCjcngcESxO/3rEf8yWYResHqPodXO1Q7yj5xXBhdqw9tFPl5yQ8OcDo72w54OdpB5tJfPaUN5N/yVGMajTM9cOPufzEcrkkd6VBRWXceHUz9wzxfWCCR/LdfGZKZkxQw1vcvcR5q6FGLhUVPTLrGpzJjtBIyd8/YLFVUvHkdPERxnsk1cw4wAMBdi9gJwcY8ilO6uqnpMwk8JHptfX1MXTgcsX0d5Dw/XTPqGhuK9p4R+jSkWt3vjgIXvb430MCjTDRUVaZTJ0zERLuxajwjJf2/fzxkOC/D++qGYM5PnGzDYtc3F8Ax5d9MTWHoUZelJaVwebM3cO+kJbIJAXB++GE4gjU2v08gYjGl8zBP4UPX2Lmr9ZZJD6rkJgtq6N7IBcuy7pqG4qKjd76pipH66YP1Qa9ykRuy62yT03zfKnNrqUVNVVVOT5KUiXTaxi6tq3W2NmrDNOML0BCt5I0tOey9BwytT1pjbzVlU1frLBB/8EAgRm9i1ApuR0TqRkPIO5jfFnJGPw533vWhtXZRLmBB+i4hdWx9qOnLzGEpGWubr168f3aMPb03791+VlRXfaPrQDdDCm/z+d0vtq3DlxwJEZ0sLS4UCDL0qrrWy8q/HJzV5ZAiA05+6bepoYafOMceNjq5+fsqTP5hfuWgDDaeBpxY3vmppqQuboT5o4R2zJPqprFh7D/HIyTgvtbulpT/8KWWx+kEJmraiokryAy/XxhojsUbdPJeOlpZ6G4vpeCzWD8E37E6dg2+g8sXafQYqbxcHEjZugCXv+GpOyHTE/oK1uPLtC/gIXmxe/8B0vDCHJkRc3dbf3fK85/9raBJhIyGqgDr1JiQmv3nz5MmTN415ExSU0RZTAIOBr9a11e7148eP/ynFubGRnEuYtHljA1yXVHS/+fpmd6BvX4+eiJWsJAOzsJWViN6aZa1R/0BmvzbcqmrFR3YxwsDt6RpUnPzk69c3777Y2Z07eTLK0O7L94/v3z9+/OGdXZCrCD+F61AYmZTVKtfafX/35P2F9xDwBGiX4dq9AQpsnAzUAEySioqqcV4PZ+1TUto363ecdwEvlyQr/qFeAI+Cp1HQ6V1eAAAAAElFTkSuQmCC" alt="JIA AN" width="48" height="48">
-    <div><p class="eyebrow">JIA AN Construction</p><h1>休息与替班</h1></div></header>
+    <div><p class="eyebrow">JIA AN Construction</p><h1>司机调度</h1></div></header>
   <p class="sub" id="sub">正在打开…</p>
   <main id="app" hidden>
     <div class="controls">
-      <input type="search" id="q" placeholder="搜工地或名字…" aria-label="搜工地或名字" autocomplete="off">
-      <div class="filters" role="group" aria-label="筛选">
-        <button class="chip" id="fGap" type="button" aria-pressed="true">缺人的</button>
-        <button class="chip" id="fAll" type="button" aria-pressed="false">全部</button>
+      <div class="tabs" role="group" aria-label="页面">
+        <button class="chip" id="tToday" type="button">今日排班</button>
+        <button class="chip" id="tGap" type="button">待替班<span class="badge" id="nGap"></span></button>
+        <button class="chip" id="tLeave" type="button">休假记录</button>
       </div>
+      <div class="daybar" id="daybar"><button type="button" id="prev" aria-label="前一天">‹</button><strong id="day"></strong><button type="button" id="next" aria-label="后一天">›</button></div>
+      <div class="filters" id="when" role="group" aria-label="时间"><button class="chip" id="wNext" type="button">即将</button><button class="chip" id="wPast" type="button">本月已过</button></div>
+      <input type="search" id="q" placeholder="搜工地、塔吊或名字…" aria-label="搜工地、塔吊或名字" autocomplete="off">
     </div>
     <div id="list"></div>
-    <p class="foot">周日不列。当天实际安排以当天的「司机安排」为准。<br>找到顶班人，点「报顶班」发到群里。</p>
+    <p class="foot">这是计划排班，不是出勤记录。<br>找到顶班人，点「报顶班」发到群里。</p>
   </main>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -71,7 +92,7 @@ const $ = id => document.getElementById(id);
 const KEY = 'jiaan-leave-key';
 const store = {get(){try{return localStorage.getItem(KEY)}catch(e){return null}}, set(v){try{v?localStorage.setItem(KEY,v):localStorage.removeItem(KEY)}catch(e){}}};
 const bytes = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
-let data = null, onlyGap = true;
+let data = null;
 
 async function open(pass){
   const pack = await (await fetch('data.json?t=' + Date.now(), {cache:'no-store'})).json();
@@ -96,32 +117,73 @@ async function report(r){
   try{ if(navigator.share){ await navigator.share({text}); return; } }catch(e){ if(e.name==='AbortError') return; }
   try{ await navigator.clipboard.writeText(text); toast('已复制，到群里粘贴并填上名字电话'); }catch(e){ prompt('复制下面这段发到群里', text); }
 }
-function card(r){
-  const c = el('div', 'card' + (r.rep ? '' : ' gap')), b = el('div','body');
+function card(r, past){
+  const c = el('div', 'card' + (r.rep || past ? '' : ' gap')), b = el('div','body');
   b.append(el('div','where', `${r.site} ${r.tc}`.trim()));
-  const who = el('div','who', `${r.who} 休息${r.part ? '（'+r.part+'）' : ''}`);
+  const who = el('div','who', `${r.who} 休假${r.part ? '（'+r.part+'）' : ''}`);
   if(r.pending) who.append(el('span','tag','请假待确认'));
-  b.append(who, el('div','state', r.rep ? `${r.rep} 顶班` : '还没人顶'));
+  b.append(who, el('div','state', r.rep ? `${r.rep} 顶班` : past ? '没记顶班' : '待替班'));
   c.append(b);
+  if(past) return c;
   if(!r.rep){ const a = el('button','act','报顶班'); a.type='button'; a.onclick=()=>report(r); c.append(a); }
   else if(r.tel){ const a = el('a','act','打电话'); a.href='tel:'+r.tel.replace(/[^\d+]/g,''); c.append(a); }
   return c;
 }
+const LABEL = {ok:'计划', cover:'顶班', gap:'待替班', open:'待安排', rest:'休', none:'无人'};
+let tab = 'today', past = false, dayAt = null;
+const match = (q, ...parts) => !q || parts.join(' ').toLowerCase().includes(q);
+function grouped(list, rows, make, headNote){
+  let last = '';
+  for(const r of rows){
+    if(r.date !== last){ last = r.date; const h = el('h2','',dayName(r.date)); if(headNote) h.append(el('span','',headNote(r.date))); list.append(h); }
+    list.append(make(r));
+  }
+}
+function drawToday(list, q){
+  const days = data.schedule.filter(d => d.date >= sg());
+  if(!days.length){ list.append(el('p','empty','今天以后还没有排班记录。')); $('day').textContent=''; return; }
+  let i = days.findIndex(d => d.date === dayAt); if(i < 0) i = 0;
+  const d = days[i]; dayAt = d.date;
+  $('day').textContent = dayName(d.date);
+  $('prev').disabled = i === 0; $('next').disabled = i === days.length - 1;
+  $('prev').onclick = () => { dayAt = days[i-1].date; draw(); };
+  $('next').onclick = () => { dayAt = days[i+1].date; draw(); };
+  if(d.date !== sg() && i === 0) list.append(el('p','empty','今天还没有排班记录，下面是最近的一天。'));
+  let shown = 0;
+  for(const s of d.sites){
+    const slots = s.slots.filter(x => match(q, s.site, x.tc, x.name, x.note));
+    if(!slots.length) continue;
+    shown++;
+    const box = el('section','site'), h = el('h3','',s.site), n = slots.filter(x=>x.state==='gap').length;
+    h.append(el('span','', s.rest ? '工地休' : n ? `待替班 ${n}` : ''));
+    box.append(h);
+    for(const x of slots){
+      const row = el('div','slot ' + x.state), nm = el('span','nm', x.name || (x.state==='none' ? '—' : x.state==='open' ? '？' : ''));
+      if(x.note) nm.append(el('small','',x.note));
+      row.append(el('span','tc', `${x.tc}${x.shift ? ' '+x.shift : ''}`), nm, el('span','st', LABEL[x.state]));
+      box.append(row);
+    }
+    list.append(box);
+  }
+  if(!shown) list.append(el('p','empty','没找到。'));
+}
 function draw(){
   const today = sg(), q = $('q').value.trim().toLowerCase();
-  const future = data.rows.filter(r => r.date >= today);
-  const gaps = d => future.filter(r => r.date===d && !r.rep).length;
+  const future = data.rows.filter(r => r.date >= today), gapRows = future.filter(r => !r.rep);
+  const gaps = d => gapRows.filter(r => r.date===d).length;
   const word = n => n ? `缺 ${n} 人` : '不缺人';
   $('sub').replaceChildren('今天 ', el('b','',word(gaps(today))), '，明天 ', el('b','',word(gaps(plus(today,1)))), `。更新于 ${data.updated}。`);
-  const shown = future.filter(r => (!onlyGap || !r.rep) && (!q || `${r.site} ${r.tc} ${r.who} ${r.rep}`.toLowerCase().includes(q)));
+  $('nGap').textContent = gapRows.length;
+  for(const [id,name] of [['tToday','today'],['tGap','gap'],['tLeave','leave']]) $(id).setAttribute('aria-pressed', tab===name);
+  $('daybar').hidden = tab !== 'today'; $('when').hidden = tab !== 'leave';
+  $('wNext').setAttribute('aria-pressed', !past); $('wPast').setAttribute('aria-pressed', past);
   const list = $('list'); list.replaceChildren();
-  let last = '';
-  for(const r of shown){
-    if(r.date !== last){ last = r.date; const h = el('h2','',dayName(r.date)); h.append(el('span','',word(gaps(r.date)))); list.append(h); }
-    list.append(card(r));
-  }
-  if(!shown.length) list.append(el('p','empty', q ? '没找到。' : '没有缺人的日子。'));
-  $('fGap').setAttribute('aria-pressed', onlyGap); $('fAll').setAttribute('aria-pressed', !onlyGap);
+  if(tab === 'today'){ drawToday(list, q); return; }
+  const source = tab === 'gap' ? gapRows : past ? data.past.filter(r => r.date < today) : future;
+  const rows = source.filter(r => match(q, r.site, r.tc, r.who, r.rep));
+  const old = tab === 'leave' && past;
+  grouped(list, rows, r => card(r, old), tab === 'gap' ? d => word(gaps(d)) : null);
+  if(!rows.length) list.append(el('p','empty', q ? '没找到。' : tab==='gap' ? '没有待替班的岗位。' : '没有记录。'));
 }
 function key(){
   const m = location.hash.match(/k=([A-Za-z0-9_-]+)/);
@@ -134,9 +196,12 @@ async function load(){
   catch(e){ $('app').hidden = true; $('sub').textContent = e.name==='OperationError' ? '这个链接已经失效，请要一个新链接。' : '打不开，请检查网络后再试。'; return; }
   store.set(k); $('app').hidden = false; draw();
 }
-$('fGap').onclick = () => { onlyGap = true; draw(); };
-$('fAll').onclick = () => { onlyGap = false; draw(); };
-$('q').oninput = draw;
+$('tToday').onclick = () => { tab = 'today'; dayAt = null; draw(); };
+$('tGap').onclick = () => { tab = 'gap'; draw(); };
+$('tLeave').onclick = () => { tab = 'leave'; draw(); };
+$('wNext').onclick = () => { past = false; draw(); };
+$('wPast').onclick = () => { past = true; draw(); };
+$('q').oninput = () => draw();
 window.addEventListener('hashchange', load);
 document.addEventListener('visibilitychange', () => { if(!document.hidden) load(); });
 load();
