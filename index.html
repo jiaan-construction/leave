@@ -106,6 +106,19 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .coverage-card .who{font-weight:600;font-size:16px}
 .leave-person .line{margin:0;align-items:start}
 .leave-dates small{display:block;color:var(--ink-soft);font-size:13px}
+.leave-calendar{margin:10px 0 14px;padding:10px;border:1px solid var(--rule);border-radius:14px;background:var(--surface)}
+.calendar-head{display:grid;grid-template-columns:auto 1fr auto auto;gap:6px;align-items:center;margin-bottom:6px}
+.calendar-head strong{text-align:center;font-size:16px}
+.calendar-head .action{justify-content:center;padding:4px 9px}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));text-align:center;gap:1px}
+.calendar-weekday{padding:4px 0;color:var(--ink-soft);font-size:12px}
+.calendar-day{display:grid;place-items:center;min-height:38px;padding:0;border:0;border-radius:9px;background:transparent;color:var(--ink);font:600 15px var(--sans)}
+.calendar-day[disabled]{color:var(--ink-faint);font-weight:400}
+.calendar-day.has-leave{color:var(--brand);cursor:pointer}
+.calendar-day[aria-pressed=true]{color:#fff;background:#C91B26}
+.calendar-day[aria-current=date]:not([aria-pressed=true]){outline:1px solid var(--rule);outline-offset:-2px}
+.calendar-selection{margin:6px 2px 0;color:var(--ink-soft);font-size:13px}
+.leave-full{margin:3px 0 0!important}
 .site-heading{align-items:center}
 .site-heading .site-tools{display:flex;align-items:center;gap:7px;flex:none}
 .site-heading .site-tools>span{white-space:nowrap}
@@ -131,6 +144,7 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
       <div class="daybar" id="daybar"><button type="button" id="prev" aria-label="前一天">‹</button><strong id="day"></strong><button type="button" id="next" aria-label="后一天">›</button></div>
       <div class="filters" id="when" role="group" aria-label="时间"><button class="chip" id="wNext" type="button">即将</button><button class="chip" id="wPast" type="button">本月已过</button></div>
     </div>
+    <section id="leaveCalendar" class="leave-calendar" aria-label="休假日历" hidden></section>
     <div id="list"></div>
     <p class="foot" id="foot"></p>
     <nav class="tabs" aria-label="调度页面"><div class="tab-inner">
@@ -239,6 +253,7 @@ function findRelief(crane){
 const LABEL = {ok:'', cover:'顶班', gap:'待替班', open:'没排人', rest:'休', none:'无人'};
 const TABS = {tToday:'today', tGap:'gap', tLeave:'leave', tOperators:'operators'};
 let tab = 'today', past = false, dayAt = null, kind = '', reliefHint = '', coverageDate = '';
+let leaveMonth = '', leaveDate = '';
 function switchTab(next, machine='', hint=''){
   tab = next;
   dayAt = null;
@@ -284,6 +299,56 @@ function compactDate(iso){
   const [year,month,day] = iso.split('-').map(Number);
   return `${year!==Number(sg().slice(0,4)) ? year+'年' : ''}${month}月${day}日`;
 }
+function leaveDateText(days, part=''){
+  const ranges = part ? [...new Set(days)].sort().map(day => [day,day]) : dateRanges(days);
+  let previousMonth = '';
+  return ranges.map(([start,end]) => {
+    const month = start.slice(0,7), endingMonth = end.slice(0,7);
+    const startDay = Number(start.slice(-2)), endDay = Number(end.slice(-2));
+    const startText = month === previousMonth ? startDay + '日' : compactDate(start);
+    previousMonth = endingMonth;
+    if(start === end) return startText + (part ? '（' + part + '）' : '');
+    if(month === endingMonth) return startText.slice(0,-1) + '–' + endDay + '日';
+    return startText + '–' + compactDate(end);
+  }).join('、');
+}
+function changeLeaveMonth(step){
+  const date = new Date((leaveMonth || sg().slice(0,7))+'-01T00:00:00Z');
+  date.setUTCMonth(date.getUTCMonth()+step);
+  leaveMonth = date.toISOString().slice(0,7);
+  leaveDate = '';
+  draw();
+}
+function drawLeaveCalendar(rows){
+  const calendar = $('leaveCalendar');
+  const today = sg();
+  const month = leaveMonth || today.slice(0,7);
+  const first = new Date(month+'-01T00:00:00Z');
+  const days = new Date(Date.UTC(first.getUTCFullYear(),first.getUTCMonth()+1,0)).getUTCDate();
+  const prev=action('‹',()=>changeLeaveMonth(-1)), next=action('›',()=>changeLeaveMonth(1));
+  prev.setAttribute('aria-label','上个月');
+  next.setAttribute('aria-label','下个月');
+  const home=action('今天',()=>{leaveMonth=today.slice(0,7); leaveDate=''; draw();});
+  const head=el('div','calendar-head');
+  head.append(prev,el('strong','',`${first.getUTCFullYear()}年${first.getUTCMonth()+1}月`),next,home);
+  const grid=el('div','calendar-grid');
+  for(const weekday of '一二三四五六日') grid.append(el('span','calendar-weekday',weekday));
+  for(let blank=0; blank<(first.getUTCDay()+6)%7; blank++) grid.append(el('span'));
+  const marked=new Set(rows.map(row=>row.date));
+  for(let day=1;day<=days;day++){
+    const iso=month+'-'+String(day).padStart(2,'0'), active=marked.has(iso);
+    const button=action(String(day),()=>{leaveDate=leaveDate===iso ? '' : iso; draw();});
+    button.className='calendar-day' + (active ? ' has-leave' : '');
+    button.disabled=!active;
+    button.setAttribute('aria-label',compactDate(iso)+(active ? '，有休假记录' : '，无休假记录'));
+    button.setAttribute('aria-pressed',String(leaveDate===iso));
+    if(today===iso) button.setAttribute('aria-current','date');
+    grid.append(button);
+  }
+  const selection=el('p','calendar-selection',leaveDate ? compactDate(leaveDate) + ' · 再点日期查看全部' : '红色日期有休假 · 当前显示全部');
+  selection.setAttribute('aria-live','polite');
+  calendar.replaceChildren(head,grid,selection);
+}
 function drawLeave(list, rows){
   const people = new Map();
   for(const r of rows){
@@ -301,7 +366,10 @@ function drawLeave(list, rows){
   for(const {name,phones,slots} of people.values()){
     const box = el('article','person leave-person');
     const header = el('div','line');
-    header.append(el('h3','',name));
+    const heading=el('div');
+    heading.append(el('h3','',name));
+    if(info(name).full) heading.append(el('p','leave-full',info(name).full));
+    header.append(heading);
     if(!past && phones.size === 1){
       header.append(whatsappLink([...phones][0],'WhatsApp 确认休假',
         'Hi, could you please confirm whether your upcoming leave dates are still the same? Thank you.'));
@@ -311,10 +379,8 @@ function drawLeave(list, rows){
       const item = el('div','leave-item');
       item.append(el('strong','',site + ' · ' + (tc || '塔吊待核')));
       for(const {r,dates:days} of dates.values()){
-        const dateText = r.part ? [...new Set(days)].sort().map(date => compactDate(date) + '（' + r.part + '）') :
-          dateRanges(days).map(([start,end]) => start === end ? compactDate(start) : compactDate(start) + '–' + compactDate(end));
-        const line = el('p','leave-dates',dateText.join('、'));
-        if(r.pending) line.append(el('span','tag','待确认'));
+        const line = el('p','leave-dates',leaveDateText(days,r.part));
+        if(r.pending) line.append(el('span','tag','请假待确认'));
         if(r.rep) line.append(el('small','',r.rep+' 顶班'));
         item.append(line);
       }
@@ -420,6 +486,7 @@ function draw(){
   $('nGap').hidden = !urgent;
   for(const [id,name] of Object.entries(TABS)) $(id).setAttribute('aria-pressed', tab===name);
   $('daybar').hidden = tab !== 'today'; $('when').hidden = tab !== 'leave';
+  $('leaveCalendar').hidden = tab !== 'leave';
   $('coverageJump').hidden = tab !== 'gap';
   $('kind').hidden = tab !== 'operators';
   for(const [id,value] of [['kAll',''],['kFlat','平桥'],['kLuff','上下桥']]) $(id).setAttribute('aria-pressed', kind===value);
@@ -439,7 +506,9 @@ function draw(){
     drawCoverage(list, [...dates].sort(), gapRows);
     return;
   }
-  drawLeave(list, past ? data.past.filter(r => r.date < today) : future);
+  const records = past ? data.past.filter(r => r.date < today) : future;
+  drawLeaveCalendar(records);
+  drawLeave(list, leaveDate ? records.filter(r => r.date===leaveDate) : records);
 
 }
 function jumpCoverage(date){
@@ -464,8 +533,8 @@ for(const [id,value] of [['kAll',''],['kFlat','平桥'],['kLuff','上下桥']]) 
 $('jumpToday').onclick = () => jumpCoverage(sg());
 $('jumpTomorrow').onclick = () => jumpCoverage(plus(sg(),1));
 $('coverageDate').onchange = event => jumpCoverage(event.target.value);
-$('wNext').onclick = () => { past = false; draw(); };
-$('wPast').onclick = () => { past = true; draw(); };
+$('wNext').onclick = () => { past = false; leaveDate = ''; leaveMonth = ''; draw(); };
+$('wPast').onclick = () => { past = true; leaveDate = ''; leaveMonth = ''; draw(); };
 window.addEventListener('hashchange', load);
 document.addEventListener('visibilitychange', () => { if(!document.hidden) load(); });
 load();
