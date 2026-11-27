@@ -46,10 +46,11 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .msg{color:var(--brand);min-height:1.4em;margin:0}
 .tabs{position:fixed;z-index:10;bottom:0;left:0;right:0;border-top:1px solid var(--rule);background:var(--surface);padding-bottom:env(safe-area-inset-bottom,0px)}
 .tab-inner{max-width:760px;margin:auto;padding:4px 8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
-.tabs .chip{font-size:clamp(12px,3.6vw,15px);padding:5px 2px 6px;min-height:56px}
+.tabs .chip{position:relative;font-size:13px;padding:5px 2px 6px;min-height:56px}
 .tabs .chip[aria-pressed=true]{box-shadow:none;color:var(--brand);background:var(--surface-2)}
 .tab-icon{display:block;font-size:19px;line-height:1.2}
-.badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:10px;background:var(--brand);color:#fff;font-size:12px;line-height:20px}
+.badge{position:absolute;top:4px;left:calc(50% + 13px);min-width:17px;padding:0 4px;border-radius:9px;background:var(--brand);color:#fff;font-size:10px;line-height:17px}
+.updated{white-space:nowrap;color:var(--ink-soft)}@media(max-width:400px){.updated{display:block;font-size:13px}}
 .daybar{display:flex;align-items:center;gap:8px}
 .daybar button{width:52px;height:44px;border:1px solid var(--rule);border-radius:11px;background:var(--surface);color:var(--ink);font:600 20px var(--sans);cursor:pointer}
 .daybar button:disabled{opacity:.3}
@@ -60,7 +61,7 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .slot{display:flex;align-items:baseline;gap:10px;padding:9px 14px;border-top:1px solid var(--rule-soft)}
 .tc{flex:none;width:76px;font-weight:600;font-size:15px}
 .nm{flex:1;min-width:0;overflow-wrap:anywhere}
-.nm small{color:var(--ink-faint);margin-left:6px}
+.visible-note{margin:4px 0 0;color:var(--ink-soft);font-size:14px;line-height:1.35;overflow-wrap:anywhere}.visible-note:before{content:"备注";font-size:11px;font-weight:600;margin-right:6px;color:var(--pending)}
 .st{flex:none;font-size:13px;color:var(--ink-faint)}
 .slot.gap{background:color-mix(in srgb,var(--brand) 9%,transparent)}
 .slot.gap .st{color:var(--brand);font-weight:700}
@@ -68,23 +69,11 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .slot.rest .nm,.slot.none .nm{color:var(--ink-faint)}
 .empty,.foot{color:var(--ink-faint);font-size:14px;text-align:center;margin-top:24px}
 .toast{position:fixed;z-index:20;left:16px;right:16px;bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--ground);border-radius:12px;padding:12px 14px;font-size:15px;text-align:center}
-.page-head,.person-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.page-head h2{border:0;margin:0;padding:0;font-size:19px}
 .action{display:inline-flex;align-items:center;min-height:44px;padding:4px 10px;border:1px solid var(--rule);border-radius:9px;background:var(--surface);color:var(--brand);font:600 14px var(--sans);text-decoration:none;cursor:pointer}
 .person{padding:14px;margin-top:10px;border:1px solid var(--rule);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
-.person h3{margin:0;font-size:18px;overflow-wrap:anywhere}
+.person p strong{display:block;color:var(--ink);font-weight:600}.relief-group>h2{margin:20px 0 8px}#operatorTitle{margin:0;padding:0;border:0}.person h3{margin:0;font-size:18px;overflow-wrap:anywhere}
 .person p,.hint{margin:6px 0;font-size:14px;color:var(--ink-soft)}
-.person .tag{margin:0;flex:none}
-.person .unknown{color:var(--settled);background:var(--settled-bg)}
 .actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
-.cover-context{padding:8px 10px;background:var(--pending-bg);color:var(--pending);border-radius:9px;font-size:14px}
-.cover-context .action{margin-left:6px}
-#availability .chip{font-size:clamp(11px,3.3vw,14px);padding:0 2px}
-dialog{background:var(--surface);color:var(--ink);border:1px solid var(--rule);border-radius:14px;padding:18px;width:min(420px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:auto}
-dialog::backdrop{background:rgba(0,0,0,.48)}
-dialog h2{margin:0 0 10px}
-dialog p{font-size:15px}
-dialog form{margin-top:12px}
 </style>
 </head>
 <body>
@@ -94,18 +83,7 @@ dialog form{margin-top:12px}
   <p class="sub" id="sub">正在打开…</p>
   <main id="app" hidden>
     <div class="controls">
-      <div id="operatorTools" hidden>
-        <div class="page-head"><h2>替班人员库</h2><a id="workerTable" class="action" target="_blank" rel="noopener noreferrer">＋ 新增人员</a></div>
-        <p class="hint" id="historyNote"></p>
-        <div id="coverContext" class="cover-context" hidden></div>
-        <div class="filters" id="availability" role="group" aria-label="可用状态">
-          <button class="chip" type="button" data-status="all">全部</button>
-          <button class="chip" type="button" data-status="reachable">可联系</button>
-          <button class="chip" type="button" data-status="booked">已预约</button>
-          <button class="chip" type="button" data-status="unavailable">暂不可用</button>
-          <button class="chip" type="button" data-status="unknown">待确认</button>
-        </div>
-      </div>
+      <h2 id="operatorTitle" hidden>替班司机</h2>
       <div class="daybar" id="daybar"><button type="button" id="prev" aria-label="前一天">‹</button><strong id="day"></strong><button type="button" id="next" aria-label="后一天">›</button></div>
       <div class="filters" id="when" role="group" aria-label="时间"><button class="chip" id="wNext" type="button">即将</button><button class="chip" id="wPast" type="button">本月已过</button></div>
       <input type="search" id="q" placeholder="搜工地、塔吊或名字…" aria-label="搜工地、塔吊或名字" autocomplete="off">
@@ -113,20 +91,13 @@ dialog form{margin-top:12px}
     <div id="list"></div>
     <p class="foot" id="foot"></p>
     <nav class="tabs" aria-label="调度页面"><div class="tab-inner">
-      <button class="chip" id="tToday" type="button" title="Today’s Schedule"><span class="tab-icon" aria-hidden="true">📅</span>今日排班</button>
-      <button class="chip" id="tGap" type="button" title="Pending Coverage"><span class="tab-icon" aria-hidden="true">🔄</span>待替班<span class="badge" id="nGap" hidden></span></button>
-      <button class="chip" id="tLeave" type="button" title="Leave Records"><span class="tab-icon" aria-hidden="true">🗓️</span>休假记录</button>
-      <button class="chip" id="tOperators" type="button" title="Relief Operators"><span class="tab-icon" aria-hidden="true">👥</span>替班人员库</button>
+      <button class="chip" id="tToday" type="button" title="Today’s Schedule"><span class="tab-icon" aria-hidden="true">📅</span><span lang="en">Schedule</span></button>
+      <button class="chip" id="tGap" type="button" title="Pending Coverage"><span class="tab-icon" aria-hidden="true">🔄</span><span lang="en">Coverage</span><span class="badge" id="nGap" hidden></span></button>
+      <button class="chip" id="tLeave" type="button" title="Leave Records"><span class="tab-icon" aria-hidden="true">🗓️</span><span lang="en">Leave</span></button>
+      <button class="chip" id="tOperators" type="button" title="Relief Operators"><span class="tab-icon" aria-hidden="true">👥</span><span lang="en">Relief</span></button>
     </div></nav>
   </main>
 </div>
-<dialog id="confirmCover" aria-labelledby="confirmTitle">
-  <h2 id="confirmTitle">确认替班安排</h2>
-  <p id="confirmDescription"></p>
-  <p>请先核实司机本人同意、该岗位工作资格及排班冲突，再登记。</p>
-  <div class="actions" id="confirmActions"></div>
-  <form method="dialog"><button class="action" type="submit">返回</button></form>
-</dialog>
 <div class="toast" id="toast" hidden></div>
 <script>
 (function(){
@@ -154,59 +125,38 @@ function dayName(iso){
 }
 let toastTimer;
 function toast(t){$('toast').textContent=t; $('toast').hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('toast').hidden=true, 3500);}
-async function report(r, person){
-  const text = `【顶班】${dayName(r.date).replace(/^(今天|明天) /,'')} ${r.site} ${r.tc}（${r.who} 休）\n顶班人：${person?.name || ''}`;
-  try{ if(navigator.share){ await navigator.share({text}); return; } }catch(e){ if(e.name==='AbortError') return; }
-  try{ await navigator.clipboard.writeText(text); toast(person ? '已复制，可在调度群提交' : '已复制，填好名字后可在调度群提交'); }catch(e){ prompt('复制下面这段发到群里', text); }
+async function report(r){
+  const who = r.who_note ? `${r.who}（${r.who_note}）` : r.who;
+  const text = `【顶班】${dayName(r.date).replace(/^(今天|明天) /,'')} ${r.site} ${r.tc}（${who} 休）\n顶班人：`;
+  try{ await navigator.clipboard.writeText(text); toast('已复制顶班信息'); }
+  catch(e){ prompt('复制顶班信息', text); }
 }
-function airLink(label, path){
-  const a = el('a','action',label);
-  a.href = airtableURL(path); a.target = '_blank'; a.rel = 'noopener noreferrer';
-  return a;
-}
-function airtableURL(path){ return new URL(path, 'https://airtable.com/').href; }
 function action(label, run){
   const b = el('button','action',label); b.type = 'button'; b.onclick = run; return b;
 }
-function confirm(r, person){
-  $('confirmDescription').textContent = [dayName(r.date), r.site, r.tc, person?.name || ''].filter(Boolean).join(' · ');
-  const actions = $('confirmActions');
-  actions.replaceChildren();
-  if(person) actions.append(airLink('联系人与资质', `${data.worker_table}/${person.record}`),
-    action('复制司机姓名', async () => {
-      try{ await navigator.clipboard.writeText(person.name); toast('司机姓名已复制'); }
-      catch(e){ prompt('复制司机姓名', person.name); }
-    }));
-  if(data.cover_interface){
-    actions.append(airLink(r.cover?.reported ? '查看 Airtable 登记' : '打开 Airtable 界面', data.cover_interface));
-    if(r.cover) actions.append(airLink('打开对应记录', `${data.cover_table}/${r.cover.record}`));
-  }
-  if(!r.cover?.reported) actions.append(action('分享顶班信息', () => { $('confirmCover').close(); report(r, person); }));
-  $('confirmCover').showModal();
+function addNote(parent, note){
+  if(note) parent.append(el('p','visible-note',note));
 }
 function card(r, past){
   const c = el('div', 'card' + (r.rep || past ? '' : ' gap')), b = el('div','body');
   b.append(el('div','where', `${r.site} ${r.tc}`.trim()));
   const who = el('div','who', `${r.who} 休假${r.part ? '（'+r.part+'）' : ''}`);
   if(r.pending) who.append(el('span','tag','请假待确认'));
-  b.append(who, el('div','state', r.rep ? `${r.rep} 顶班` : past ? '没记顶班' : '待替班'));
+  b.append(who);
+  addNote(b, r.who_note);
+  b.append(el('div','state', r.rep ? `${r.rep} 顶班` : past ? '没记顶班' : '待替班'));
+  addNote(b, r.rep_note);
   c.append(b);
-  if(past) return c;
-  if(!r.rep){
-    if(r.cover?.reported) b.append(el('p','hint','Airtable 已登记，待排班回写'));
+  if(!past && !r.rep){
     const actions = el('div','actions');
-    if(!r.cover?.reported) actions.append(action('寻找替班人员', () => {
-      selectedCover = r; status = 'all'; switchTab('operators');
-    }));
-    actions.append(action(r.cover?.reported ? '查看登记' : '报顶班', () => confirm(r)));
+    actions.append(action('复制顶班信息', () => report(r)));
     b.append(actions);
   }
   return c;
 }
 const LABEL = {ok:'计划', cover:'顶班', gap:'待替班', open:'待安排', rest:'休', none:'无人'};
 const TABS = {tToday:'today', tGap:'gap', tLeave:'leave', tOperators:'operators'};
-const AVAILABILITY = {unknown:'待确认', reachable:'可联系', booked:'已预约', unavailable:'暂不可用'};
-let tab = 'today', past = false, dayAt = null, status = 'all', selectedCover = null;
+let tab = 'today', past = false, dayAt = null;
 const match = (q, ...parts) => q.split(/\s+/).every(word => parts.join(' ').toLowerCase().includes(word));
 function switchTab(next){
   if(tab !== next) $('q').value = '';
@@ -216,36 +166,31 @@ function switchTab(next){
   draw();
 }
 function drawOperators(list, q){
-  $('workerTable').hidden = !data.worker_table;
-  if(data.worker_table) $('workerTable').href = airtableURL(data.worker_table);
-  const context = $('coverContext');
-  context.hidden = !selectedCover;
-  if(selectedCover){
-    context.replaceChildren(`${dayName(selectedCover.date)} · ${selectedCover.site} ${selectedCover.tc}`,
-      action('清除岗位', () => { selectedCover = null; draw(); }));
+  const groups = new Map();
+  for(const person of data.operators || []){
+    const area = person.area || '区域待补';
+    const certs = person.certificates || [];
+    if(!match(q, person.name, person.note, area, ...certs)) continue;
+    if(!groups.has(area)) groups.set(area, []);
+    groups.get(area).push(person);
   }
-  $('historyNote').textContent = data.history_from
-    ? `历史从 ${data.history_from} 起，依据已过日期的排班。人员可用性由现场另行核实。` : '';
-  if(!Array.isArray(data.operators)){
-    list.append(el('p','empty','人员主档暂不可读，请稍后重试或到 Airtable 查看。'));
-    return;
+  for(const [area, people] of groups){
+    const section = el('section', 'relief-group');
+    const title = el('h2','',area);
+    title.append(el('span','',`${people.length} 人`));
+    section.append(title);
+    for(const p of people){
+      const box = el('article','person');
+      box.append(el('h3','',p.name));
+      addNote(box, p.note);
+      const cert = el('p','', '塔吊证件');
+      cert.append(el('strong','', p.certificates?.join('；') || '资料待补'));
+      box.append(cert);
+      section.append(box);
+    }
+    list.append(section);
   }
-  const rows = data.operators.filter(p => (status === 'all' || p.status === status)
-    && match(q, p.name, ...p.aliases, ...p.sites));
-  for(const p of rows){
-    const box = el('article','person'), head = el('div','person-head');
-    head.append(el('h3','',p.name), el('span','tag '+p.status,AVAILABILITY[p.status] ?? AVAILABILITY.unknown));
-    box.append(head);
-    if(p.aliases.length) box.append(el('p','',`常用称呼 · ${p.aliases.join('、')}`));
-    box.append(el('p','',`历史排班工地 · ${p.sites.join('、') || '暂无记录'}`),
-      el('p','',p.cover_count ? `历史安排替班 ${p.cover_count} 次 · 最近 ${dayName(p.last_cover)}` : '累计范围内暂无替班安排记录'));
-    const actions = el('div','actions');
-    actions.append(airLink('联系资料与详情', `${data.worker_table}/${p.record}`));
-    if(selectedCover) actions.append(action('登记这位司机', () => confirm(selectedCover, p)));
-    box.append(actions);
-    list.append(box);
-  }
-  if(!rows.length) list.append(el('p','empty',q || status !== 'all' ? '没有符合条件的人员。' : '目前主档没有可列出的替班人员。'));
+  if(!groups.size) list.append(el('p','empty', q ? '没有找到符合条件的司机。' : '暂无替班司机记录。'));
 }
 function grouped(list, rows, make, headNote){
   let last = '';
@@ -273,8 +218,8 @@ function drawToday(list, q){
     h.append(el('span','', s.rest ? '工地休' : n ? `待替班 ${n}` : ''));
     box.append(h);
     for(const x of slots){
-      const row = el('div','slot ' + x.state), nm = el('span','nm', x.name || (x.state==='none' ? '—' : x.state==='open' ? '？' : ''));
-      if(x.note) nm.append(el('small','',x.note));
+      const row = el('div','slot ' + x.state), nm = el('div','nm', x.name || (x.state==='none' ? '—' : x.state==='open' ? '？' : ''));
+      addNote(nm, x.note);
       row.append(el('span','tc', `${x.tc}${x.shift ? ' '+x.shift : ''}`), nm, el('span','st', LABEL[x.state]));
       box.append(row);
     }
@@ -287,25 +232,24 @@ function draw(){
   const future = data.rows.filter(r => r.date >= today), gapRows = future.filter(r => !r.rep);
   const gaps = d => gapRows.filter(r => r.date===d).length;
   const word = n => n ? `缺 ${n} 人` : '不缺人';
-  $('sub').replaceChildren('今天 ', el('b','',word(gaps(today))), '，明天 ', el('b','',word(gaps(plus(today,1)))), `。更新于 ${data.updated}。`);
+  $('sub').replaceChildren('今天 ', el('b','',word(gaps(today))), '，明天 ', el('b','',word(gaps(plus(today,1)))), '。 ', el('span','updated', `更新于 ${data.updated}`));
   $('nGap').textContent = gapRows.length;
   $('nGap').hidden = !gapRows.length;
   for(const [id,name] of Object.entries(TABS)) $(id).setAttribute('aria-pressed', tab===name);
   $('daybar').hidden = tab !== 'today'; $('when').hidden = tab !== 'leave';
-  $('operatorTools').hidden = tab !== 'operators';
-  const prompt = tab === 'operators' ? '搜姓名、常用称呼或历史工地' : '搜工地、塔吊或名字';
+  $('operatorTitle').hidden = tab !== 'operators';
+  const prompt = tab === 'operators' ? '搜姓名、常用称呼、区域或证件' : '搜工地、塔吊或名字';
   $('q').placeholder = prompt + '…';
   $('q').setAttribute('aria-label', prompt);
-  for(const button of $('availability').querySelectorAll('button')) button.setAttribute('aria-pressed', button.dataset.status === status);
   $('wNext').setAttribute('aria-pressed', !past); $('wPast').setAttribute('aria-pressed', past);
   $('foot').textContent = tab === 'operators'
-    ? '联系资料与资格详情由 Airtable 权限控制。可用性、派工资格和到岗需分别确认。'
+    ? '证件栏显示本地已收资料。派工前请核对资格及有效期。'
     : '页面显示排班安排。实际出勤以现场记录为准。';
   const list = $('list'); list.replaceChildren();
   if(tab === 'today'){ drawToday(list, q); return; }
   if(tab === 'operators'){ drawOperators(list, q); return; }
   const source = tab === 'gap' ? gapRows : past ? data.past.filter(r => r.date < today) : future;
-  const rows = source.filter(r => match(q, r.site, r.tc, r.who, r.rep));
+  const rows = source.filter(r => match(q, r.site, r.tc, r.who, r.rep, r.who_note, r.rep_note));
   const old = tab === 'leave' && past;
   grouped(list, rows, r => card(r, old), tab === 'gap' ? d => word(gaps(d)) : null);
   if(!rows.length) list.append(el('p','empty', q ? '没找到。' : tab==='gap' ? '没有待替班的岗位。' : '没有记录。'));
@@ -321,13 +265,7 @@ async function load(){
   catch(e){ $('app').hidden = true; $('sub').textContent = e.name==='OperationError' ? '这个链接已经失效，请要一个新链接。' : '打不开，请检查网络后再试。'; return; }
   store.set(k); $('app').hidden = false; draw();
 }
-for(const [id,next] of Object.entries(TABS)) $(id).onclick = () => {
-  if(next === 'operators') selectedCover = null;
-  switchTab(next);
-};
-for(const button of $('availability').querySelectorAll('button')) button.onclick = () => {
-  status = button.dataset.status; draw();
-};
+for(const [id,next] of Object.entries(TABS)) $(id).onclick = () => switchTab(next);
 $('wNext').onclick = () => { past = false; draw(); };
 $('wPast').onclick = () => { past = true; draw(); };
 $('q').oninput = () => draw();
