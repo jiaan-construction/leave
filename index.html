@@ -97,6 +97,15 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .coverage-day .site h4{margin:0;padding:10px 14px;font-size:15px;background:var(--surface-2)}
 .coverage-day .empty{margin:10px 0;text-align:left}
 .coverage-day .card:last-child{margin-bottom:0}
+.coverage-day{scroll-margin-top:78px}
+.coverage-jump{display:flex;align-items:center;gap:6px}
+.coverage-jump button{flex:0 0 auto}
+.date-choice{display:flex;align-items:center;gap:6px;min-width:0;margin-left:auto;font-size:13px}
+.date-choice input{max-width:100%;min-width:0;min-height:44px;padding:4px 6px;border:1px solid var(--rule);border-radius:9px;background:var(--surface);color:var(--ink);font:inherit}
+.coverage-slot .action,.coverage-card .action{white-space:nowrap}
+.coverage-card .who{font-weight:600;font-size:16px}
+.leave-person .line{margin:0;align-items:start}
+.leave-dates small{display:block;color:var(--ink-soft);font-size:13px}
 .site-heading{align-items:center}
 .site-heading .site-tools{display:flex;align-items:center;gap:7px;flex:none}
 .site-heading .site-tools>span{white-space:nowrap}
@@ -114,6 +123,10 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
   <p class="sub" id="sub">正在打开…</p>
   <main id="app" hidden>
     <div class="controls">
+      <div id="coverageJump" class="coverage-jump" hidden>
+        <button id="jumpToday" class="action" type="button">今天</button><button id="jumpTomorrow" class="action" type="button">明天</button>
+        <label class="date-choice">日历 <input id="coverageDate" type="date"></label>
+      </div>
       <div class="filters" id="kind" role="group" aria-label="能开的机型"><button class="chip" id="kAll" type="button">全部</button><button class="chip" id="kFlat" type="button">平桥</button><button class="chip" id="kLuff" type="button">上下桥</button></div>
       <div class="daybar" id="daybar"><button type="button" id="prev" aria-label="前一天">‹</button><strong id="day"></strong><button type="button" id="next" aria-label="后一天">›</button></div>
       <div class="filters" id="when" role="group" aria-label="时间"><button class="chip" id="wNext" type="button">即将</button><button class="chip" id="wPast" type="button">本月已过</button></div>
@@ -165,21 +178,27 @@ async function report(r){
     (/^\d{1,2}:\d{2}–\d{1,2}:\d{2}$/.test(r.part || '') ? ' from ' + r.part.replace('–',' to ') : '');
   const crane = r.tc ? ' (tower crane ' + r.tc + ')' : '';
   const text = `Hi, could you help cover a tower crane shift at ${site}${crane} on ${date}${shift}? Please let me know if you're available. Thank you!`;
-  try{ await navigator.clipboard.writeText(text); toast('英文消息已复制'); }
-  catch(e){ prompt('复制英文消息', text); }
+  try{ await navigator.clipboard.writeText(text); toast('英文邀班已复制'); }
+  catch(e){ prompt('复制英文邀班', text); }
 }
 function action(label, run){
   const b = el('button','action',label); b.type = 'button'; b.onclick = run; return b;
 }
 function chip(text){ return el('span', 'chiptype' + (text.includes('待核') ? ' unknown' : ''), text); }
+function whatsappLink(phone, label='WhatsApp', message=''){
+  const link = el('a','call',label);
+  const url = new URL('https://wa.me/' + phone.replace(/\D/g,''));
+  if(message) url.searchParams.set('text',message);
+  link.href = url.href;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  return link;
+}
 function contacts(phone, name){
   const group = el('div','contact-actions');
   const call = el('a','call','Call');
   call.href = 'tel:' + phone.replace(/[^\d+]/g,'');
-  const whatsapp = el('a','call','WhatsApp');
-  whatsapp.href = 'https://wa.me/' + phone.replace(/\D/g,'');
-  whatsapp.target = '_blank';
-  whatsapp.rel = 'noopener noreferrer';
+  const whatsapp = whatsappLink(phone);
   if(name){
     call.setAttribute('aria-label','Call ' + name);
     whatsapp.setAttribute('aria-label','WhatsApp ' + name);
@@ -198,43 +217,38 @@ function details(name, phone, note){
   for(const line of lines.filter(Boolean)) d.append(el('div','detail',line));
   return d;
 }
-function card(r, past){
-  const c = el('div', 'card' + (r.rep || past ? '' : ' gap')), b = el('div','body');
-  b.append(el('div','where', `${r.site} ${r.tc}`.trim()));
-  const need = el('div','need','机位要求：'); need.append(chip(r.crane));
-  b.append(need);
+function coverageCard(r){
+  const c = el('div','card gap coverage-card'), b = el('div','body');
   const who = el('div','who', `${r.who} 休假${r.part ? '（'+r.part+'）' : ''}`);
   if(r.pending) who.append(el('span','tag','请假待确认'));
-  b.append(who);
-  const line = el('div','line');
-  line.append(el('div','state', r.rep ? `${r.rep} 顶班` : past ? '没记顶班' : '待替班'));
-  if(r.rep && r.rep_phone && !past) line.append(contacts(r.rep_phone, r.rep));
-  b.append(line);
-  if(!past && !r.rep){
-    const actions = el('div','actions');
-    actions.append(action('找能顶的司机', () => findRelief(r.crane)), action('Message', () => report(r)));
-    if(r.who_phone) actions.append(contacts(r.who_phone, r.who));
-    b.append(actions);
-  }
+  const site = el('div','need',`${r.site} · ${r.tc || '塔吊待核'} `);
+  site.append(chip(r.crane));
+  b.append(who, site, coverageActions(r));
   c.append(b);
   return c;
 }
+function coverageActions(row){
+  const actions = el('div','actions');
+  actions.append(action('找人', () => findRelief(row.crane)), action('复制英文邀班', () => report(row)));
+  return actions;
+}
 function findRelief(crane){
-  switchTab('operators');
-  kind = crane.startsWith('平桥') ? '平桥' : crane.startsWith('上下桥') ? '上下桥' : '';
-  draw();
+  const machine = crane.startsWith('平桥') ? '平桥' : crane.startsWith('上下桥') ? '上下桥' : '';
+  switchTab('operators', machine, machine ? '' : '该机位机型待核，以下为全部替班司机。');
 }
 const LABEL = {ok:'', cover:'顶班', gap:'待替班', open:'没排人', rest:'休', none:'无人'};
 const TABS = {tToday:'today', tGap:'gap', tLeave:'leave', tOperators:'operators'};
-let tab = 'today', past = false, dayAt = null, kind = '';
-function switchTab(next){
+let tab = 'today', past = false, dayAt = null, kind = '', reliefHint = '', coverageDate = '';
+function switchTab(next, machine='', hint=''){
   tab = next;
   dayAt = null;
-  kind = '';
+  kind = machine;
+  reliefHint = hint;
   window.scrollTo(0, 0);
   draw();
 }
 function drawOperators(list){
+  if(reliefHint) list.append(el('p','hint',reliefHint));
   const found = data.operators || [];
   const order = (a,b) => (!!b.phone - !!a.phone) || (b.types.length - a.types.length) || a.name.localeCompare(b.name);
   const sure = found.filter(p => !kind || p.types.includes(kind)).sort(order);
@@ -249,7 +263,7 @@ function drawOperators(list){
     const labels = {'平桥':'Saddle Jib','上下桥':'Luffing Jib'};
     for(const kind of p.types) if(labels[kind]) heading.append(chip(labels[kind]));
     line.append(heading);
-    if(p.phone) line.append(contacts(p.phone, p.name));
+    if(p.phone) line.append(whatsappLink(p.phone));
     box.append(line);
     for(const x of [p.note, p.area && '居住位置：' + p.area, p.phone && '手机：' + pretty(p.phone)].filter(Boolean))
       box.append(el('div','detail',x));
@@ -274,24 +288,36 @@ function drawLeave(list, rows){
   const people = new Map();
   for(const r of rows){
     const person = r.person_group || JSON.stringify([r.who,r.site,r.tc]);
-    if(!people.has(person)) people.set(person, {name:r.who, entries:new Map()});
-    const entries = people.get(person).entries;
-    const key = JSON.stringify([r.site,r.tc,r.part || '',!!r.pending,r.rep || '']);
-    if(!entries.has(key)) entries.set(key, {r, dates:[]});
-    entries.get(key).dates.push(r.date);
+    if(!people.has(person)) people.set(person, {name:r.who, phones:new Set(), slots:new Map()});
+    const entry = people.get(person);
+    if(r.who_phone) entry.phones.add(r.who_phone);
+    const slot = JSON.stringify([r.site,r.tc]);
+    if(!entry.slots.has(slot)) entry.slots.set(slot, {site:r.site,tc:r.tc,dates:new Map()});
+    const dates = entry.slots.get(slot).dates;
+    const status = JSON.stringify([r.part || '',!!r.pending,r.rep || '']);
+    if(!dates.has(status)) dates.set(status,{r,dates:[]});
+    dates.get(status).dates.push(r.date);
   }
-  for(const {name,entries} of people.values()){
+  for(const {name,phones,slots} of people.values()){
     const box = el('article','person leave-person');
-    box.append(el('h3','',name));
-    for(const {r,dates} of entries.values()){
+    const header = el('div','line');
+    header.append(el('h3','',name));
+    if(!past && phones.size === 1){
+      header.append(whatsappLink([...phones][0],'WhatsApp 确认休假',
+        'Hi, could you please confirm whether your upcoming leave dates are still the same? Thank you.'));
+    }
+    box.append(header);
+    for(const {site,tc,dates} of slots.values()){
       const item = el('div','leave-item');
-      item.append(el('strong','',r.site + ' · ' + (r.tc || '塔吊待核')));
-      const dateText = r.part ? [...new Set(dates)].sort().map(date => compactDate(date) + '（' + r.part + '）') :
-        dateRanges(dates).map(([start,end]) => start === end ? compactDate(start) : compactDate(start) + '–' + compactDate(end));
-      const line = el('p','leave-dates',dateText.join('、'));
-      if(r.pending) line.append(el('span','tag','待确认'));
-      item.append(line);
-      if(r.rep) item.append(el('p','',r.rep+' 顶班'));
+      item.append(el('strong','',site + ' · ' + (tc || '塔吊待核')));
+      for(const {r,dates:days} of dates.values()){
+        const dateText = r.part ? [...new Set(days)].sort().map(date => compactDate(date) + '（' + r.part + '）') :
+          dateRanges(days).map(([start,end]) => start === end ? compactDate(start) : compactDate(start) + '–' + compactDate(end));
+        const line = el('p','leave-dates',dateText.join('、'));
+        if(r.pending) line.append(el('span','tag','待确认'));
+        if(r.rep) line.append(el('small','',r.rep+' 顶班'));
+        item.append(line);
+      }
       box.append(item);
     }
     list.append(box);
@@ -303,10 +329,11 @@ function drawCoverage(list, dates, gaps){
     const leave = gaps.filter(r => r.date === date);
     const open = openSlots(date);
     const block = el('section','coverage-day');
+    block.id = 'coverage-' + date;
     block.append(el('h2','',dayName(date)));
     if(leave.length){
       block.append(el('h3','',`待替班 ${leave.length}`));
-      for(const row of leave) block.append(card(row, false));
+      for(const row of leave) block.append(coverageCard(row));
     }
     if(open.length){
       block.append(el('h3','',`没排人 ${open.length}`));
@@ -314,7 +341,11 @@ function drawCoverage(list, dates, gaps){
         const box = el('section','site');
         box.append(el('h4','',site));
         for(const row of open.filter(x => x.site === site)){
-          box.append(slotRow(row, () => report({...row,date})));
+          const slot = el('div','slot open coverage-slot');
+          const content = el('div','nm',`${row.tc}${row.shift ? ' ' + row.shift : ''} `);
+          content.append(chip(row.crane));
+          slot.append(content,coverageActions({...row,date}));
+          box.append(slot);
         }
         block.append(box);
       }
@@ -337,7 +368,7 @@ function navigationLink(site){
   link.title = '导航到' + destination;
   return link;
 }
-function slotRow(x, message){
+function slotRow(x){
   const row = el('div','slot ' + x.state), tc = el('div','tc', `${x.tc}${x.shift ? ' '+x.shift : ''}`);
   tc.append(chip(x.crane));
   const nm = el('div','nm');
@@ -346,7 +377,6 @@ function slotRow(x, message){
   row.append(tc, nm);
   if(LABEL[x.state]) row.append(el('span','st', LABEL[x.state]));
   if(x.phone && (x.state==='ok' || x.state==='cover')) row.append(contacts(x.phone, x.name));
-  if(message) row.append(action('Message', message));
   return row;
 }
 function openSlots(day){
@@ -383,18 +413,14 @@ function draw(){
   const today = sg();
   const tomorrow = plus(today,1);
   const future = data.rows.filter(r => r.date >= today);
-  const gapRows = future.filter(r => r.date <= tomorrow && !r.rep);
-  const gaps = d => gapRows.filter(r => r.date===d).length;
-  const summary = (label, d) => {
-    const p = el('p','', label), open = openSlots(d).length;
-    p.append(el('b','', gaps(d) ? `待替班 ${gaps(d)}` : '休假都有人顶'), open ? `，没排人 ${open}` : '');
-    return p;
-  };
-  $('sub').replaceChildren(summary('今天：', today), summary('明天：', tomorrow), el('p','updated', `更新于 ${data.updated}`));
-  $('nGap').textContent = gapRows.length;
-  $('nGap').hidden = !gapRows.length;
+  const gapRows = future.filter(r => !r.rep);
+  const urgent = gapRows.filter(r => r.date <= tomorrow).length;
+  $('sub').replaceChildren(el('span','updated', `更新于 ${data.updated}`));
+  $('nGap').textContent = urgent;
+  $('nGap').hidden = !urgent;
   for(const [id,name] of Object.entries(TABS)) $(id).setAttribute('aria-pressed', tab===name);
   $('daybar').hidden = tab !== 'today'; $('when').hidden = tab !== 'leave';
+  $('coverageJump').hidden = tab !== 'gap';
   $('kind').hidden = tab !== 'operators';
   for(const [id,value] of [['kAll',''],['kFlat','平桥'],['kLuff','上下桥']]) $(id).setAttribute('aria-pressed', kind===value);
   $('wNext').setAttribute('aria-pressed', !past); $('wPast').setAttribute('aria-pressed', past);
@@ -403,9 +429,24 @@ function draw(){
   const list = $('list'); list.replaceChildren();
   if(tab === 'today'){ drawToday(list); return; }
   if(tab === 'operators'){ drawOperators(list); return; }
-  if(tab === 'gap'){ drawCoverage(list, [today,tomorrow], gapRows); return; }
+  if(tab === 'gap'){
+    const calendar = $('coverageDate');
+    calendar.min = today;
+    calendar.value = coverageDate >= today ? coverageDate : today;
+    const unassignedDates = data.schedule.filter(d => d.date >= today &&
+      d.sites.some(site => site.slots.some(slot => slot.state === 'open'))).map(d => d.date);
+    const dates = new Set([today,tomorrow,calendar.value,...gapRows.map(row => row.date),...unassignedDates]);
+    drawCoverage(list, [...dates].sort(), gapRows);
+    return;
+  }
   drawLeave(list, past ? data.past.filter(r => r.date < today) : future);
 
+}
+function jumpCoverage(date){
+  if(!date || date < sg()) return;
+  coverageDate = date;
+  draw();
+  $(`coverage-${date}`)?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function key(){
   const m = location.hash.match(/k=([A-Za-z0-9_-]+)/);
@@ -420,6 +461,9 @@ async function load(){
 }
 for(const [id,next] of Object.entries(TABS)) $(id).onclick = () => switchTab(next);
 for(const [id,value] of [['kAll',''],['kFlat','平桥'],['kLuff','上下桥']]) $(id).onclick = () => { kind = value; draw(); };
+$('jumpToday').onclick = () => jumpCoverage(sg());
+$('jumpTomorrow').onclick = () => jumpCoverage(plus(sg(),1));
+$('coverageDate').onchange = event => jumpCoverage(event.target.value);
 $('wNext').onclick = () => { past = false; draw(); };
 $('wPast').onclick = () => { past = true; draw(); };
 window.addEventListener('hashchange', load);
