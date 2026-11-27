@@ -48,9 +48,9 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .tab-inner{max-width:760px;margin:auto;padding:4px 8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
 .tabs .chip{position:relative;font-size:13px;padding:5px 2px 6px;min-height:56px}
 .tabs .chip[aria-pressed=true]{box-shadow:none;color:var(--brand);background:var(--surface-2)}
-.tab-icon{display:block;font-size:19px;line-height:1.2}
-.badge{position:absolute;top:4px;left:calc(50% + 13px);min-width:17px;padding:0 4px;border-radius:9px;background:var(--brand);color:#fff;font-size:10px;line-height:17px}
-.updated{white-space:nowrap;color:var(--ink-soft)}@media(max-width:400px){.updated{display:block;font-size:13px}}
+.tab-en{display:block;font-size:10px;font-weight:500;line-height:1.2;margin-bottom:4px}
+.badge{display:inline-block;min-width:15px;padding:0 3px;margin-left:3px;border-radius:8px;background:var(--brand);color:#fff;font-size:10px;line-height:15px;vertical-align:1px}
+.updated{white-space:nowrap;color:var(--ink-soft)}
 .daybar{display:flex;align-items:center;gap:8px}
 .daybar button{width:52px;height:44px;border:1px solid var(--rule);border-radius:11px;background:var(--surface);color:var(--ink);font:600 20px var(--sans);cursor:pointer}
 .daybar button:disabled{opacity:.3}
@@ -91,10 +91,10 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
     <div id="list"></div>
     <p class="foot" id="foot"></p>
     <nav class="tabs" aria-label="调度页面"><div class="tab-inner">
-      <button class="chip" id="tToday" type="button" title="Today’s Schedule"><span class="tab-icon" aria-hidden="true">📅</span><span lang="en">Schedule</span></button>
-      <button class="chip" id="tGap" type="button" title="Pending Coverage"><span class="tab-icon" aria-hidden="true">🔄</span><span lang="en">Coverage</span><span class="badge" id="nGap" hidden></span></button>
-      <button class="chip" id="tLeave" type="button" title="Leave Records"><span class="tab-icon" aria-hidden="true">🗓️</span><span lang="en">Leave</span></button>
-      <button class="chip" id="tOperators" type="button" title="Relief Operators"><span class="tab-icon" aria-hidden="true">👥</span><span lang="en">Relief</span></button>
+      <button class="chip" id="tToday" type="button"><span class="tab-en" lang="en">Schedule</span>今日排班</button>
+      <button class="chip" id="tGap" type="button"><span class="tab-en" lang="en">Coverage</span>待替班<span class="badge" id="nGap" hidden></span></button>
+      <button class="chip" id="tLeave" type="button"><span class="tab-en" lang="en">Leave</span>休假记录</button>
+      <button class="chip" id="tOperators" type="button"><span class="tab-en" lang="en">Relief</span>替班司机</button>
     </div></nav>
   </main>
 </div>
@@ -177,7 +177,6 @@ function drawOperators(list, q){
   for(const [area, people] of groups){
     const section = el('section', 'relief-group');
     const title = el('h2','',area);
-    title.append(el('span','',`${people.length} 人`));
     section.append(title);
     for(const p of people){
       const box = el('article','person');
@@ -229,10 +228,12 @@ function drawToday(list, q){
 }
 function draw(){
   const today = sg(), q = $('q').value.trim().toLowerCase();
-  const future = data.rows.filter(r => r.date >= today), gapRows = future.filter(r => !r.rep);
+  const tomorrow = plus(today,1);
+  const future = data.rows.filter(r => r.date >= today);
+  const gapRows = future.filter(r => r.date <= tomorrow && !r.rep);
   const gaps = d => gapRows.filter(r => r.date===d).length;
   const word = n => n ? `缺 ${n} 人` : '不缺人';
-  $('sub').replaceChildren('今天 ', el('b','',word(gaps(today))), '，明天 ', el('b','',word(gaps(plus(today,1)))), '。 ', el('span','updated', `更新于 ${data.updated}`));
+  $('sub').replaceChildren(el('span','updated', `更新于 ${data.updated}`));
   $('nGap').textContent = gapRows.length;
   $('nGap').hidden = !gapRows.length;
   for(const [id,name] of Object.entries(TABS)) $(id).setAttribute('aria-pressed', tab===name);
@@ -242,9 +243,8 @@ function draw(){
   $('q').placeholder = prompt + '…';
   $('q').setAttribute('aria-label', prompt);
   $('wNext').setAttribute('aria-pressed', !past); $('wPast').setAttribute('aria-pressed', past);
-  $('foot').textContent = tab === 'operators'
-    ? '证件栏显示本地已收资料。派工前请核对资格及有效期。'
-    : '页面显示排班安排。实际出勤以现场记录为准。';
+  $('foot').hidden = tab !== 'operators';
+  $('foot').textContent = '派工前请核对证件类别及有效期。';
   const list = $('list'); list.replaceChildren();
   if(tab === 'today'){ drawToday(list, q); return; }
   if(tab === 'operators'){ drawOperators(list, q); return; }
@@ -252,7 +252,7 @@ function draw(){
   const rows = source.filter(r => match(q, r.site, r.tc, r.who, r.rep, r.who_note, r.rep_note));
   const old = tab === 'leave' && past;
   grouped(list, rows, r => card(r, old), tab === 'gap' ? d => word(gaps(d)) : null);
-  if(!rows.length) list.append(el('p','empty', q ? '没找到。' : tab==='gap' ? '没有待替班的岗位。' : '没有记录。'));
+  if(!rows.length) list.append(el('p','empty', q ? '没找到。' : tab==='gap' ? '今天和明天没有待替班的岗位。' : '没有记录。'));
 }
 function key(){
   const m = location.hash.match(/k=([A-Za-z0-9_-]+)/);
