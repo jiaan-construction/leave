@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>JIA AN 休息与替班</title>
+<style>
+/* 沿用工地导航的 JIA AN 视觉规范：品牌红只用于动作与标识 */
+:root{--brand:#E9272C;--ground:#F6F7F9;--surface:#fff;--surface-2:#F1F3F6;--ink:#111;--ink-soft:#5E6367;--ink-faint:#8C9296;
+--rule:#E1E4E8;--rule-soft:#EDEFF2;--settled:#2E3438;--settled-bg:#ECEEF0;--pending:#B4620F;--pending-bg:#FBEEDF;
+--shadow:0 1px 2px rgba(17,17,17,.05),0 4px 14px rgba(17,17,17,.05);
+--sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+@media (prefers-color-scheme:dark){:root{--brand:#FF5054;--ground:#111214;--surface:#1A1C1F;--surface-2:#212429;--ink:#EDEEEF;--ink-soft:#A0A6AA;--ink-faint:#767C81;--rule:#2A2E33;--rule-soft:#22262A;--settled:#C3CACE;--settled-bg:#262A2E;--pending:#E0953F;--pending-bg:#2E2415}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--ground);color:var(--ink);font:17px/1.47 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px calc(60px + env(safe-area-inset-bottom,0px))}
+.masthead{display:flex;align-items:center;gap:14px;padding:14px 0 6px}
+.masthead img{width:48px;height:48px;flex:none}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--brand);margin:0 0 4px}
+h1{font-size:30px;font-weight:700;letter-spacing:-.02em;margin:0;line-height:1.1}
+.sub{margin:14px 0 0;font-size:15px;color:var(--ink-soft);padding-top:13px;border-top:2px solid var(--brand)}
+.sub b{color:var(--ink)}
+.controls{position:sticky;top:0;z-index:5;background:var(--ground);padding:11px 0 12px;border-bottom:1px solid var(--rule-soft);display:flex;flex-direction:column;gap:8px}
+input[type=search],input[type=password]{width:100%;height:52px;padding:0 16px;font:400 17px/1 var(--sans);color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:12px}
+input:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:transparent}
+.filters{display:flex;gap:3px;padding:3px;background:var(--surface-2);border:1px solid var(--rule);border-radius:11px}
+.chip{flex:1;min-height:44px;font:600 15px var(--sans);color:var(--ink-soft);background:transparent;border:0;border-radius:9px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(17,17,17,.14)}
+h2{display:flex;justify-content:space-between;align-items:baseline;font-size:17px;margin:22px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--rule)}
+h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
+.card{display:flex;background:var(--surface);border:1px solid var(--rule);border-radius:14px;box-shadow:var(--shadow);margin-bottom:8px;overflow:hidden}
+.card:before{content:"";width:6px;flex:none;background:var(--settled)}
+.card.gap:before{background:var(--brand)}
+.body{flex:1;min-width:0;padding:12px 14px}
+.where{font-size:19px;font-weight:700}
+.who{color:var(--ink-soft);font-size:15px}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:1px 7px;border-radius:6px;margin-left:6px;background:var(--pending-bg);color:var(--pending)}
+.state{margin-top:6px;font-weight:600}
+.gap .state{color:var(--brand)}
+.act{flex:none;width:84px;border:0;border-left:1px solid var(--rule-soft);background:transparent;color:var(--brand);font:600 14px var(--sans);cursor:pointer;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;padding:6px}
+.gate{margin-top:20px;display:flex;flex-direction:column;gap:10px}
+.btn{min-height:52px;border:0;border-radius:12px;background:var(--brand);color:#fff;font:600 17px var(--sans);cursor:pointer}
+.msg{color:var(--brand);min-height:1.4em;margin:0}
+.empty,.foot{color:var(--ink-faint);font-size:14px;text-align:center;margin-top:24px}
+.toast{position:fixed;left:16px;right:16px;bottom:16px;background:var(--ink);color:var(--ground);border-radius:12px;padding:12px 14px;font-size:15px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead"><img src="data:image/png;base64,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" alt="JIA AN" width="48" height="48">
+    <div><p class="eyebrow">JIA AN Construction</p><h1>休息与替班</h1></div></header>
+  <p class="sub" id="sub">正在打开…</p>
+  <main id="app" hidden>
+    <div class="controls">
+      <input type="search" id="q" placeholder="搜工地或名字…" aria-label="搜工地或名字" autocomplete="off">
+      <div class="filters" role="group" aria-label="筛选">
+        <button class="chip" id="fGap" type="button" aria-pressed="true">缺人的</button>
+        <button class="chip" id="fAll" type="button" aria-pressed="false">全部</button>
+      </div>
+    </div>
+    <div id="list"></div>
+    <p class="foot">周日不列。当天实际安排以当天的「司机安排」为准。<br>找到顶班人，点「报顶班」发到群里。</p>
+  </main>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script>
+(function(){
+const $ = id => document.getElementById(id);
+const KEY = 'jiaan-leave-key';
+const store = {get(){try{return localStorage.getItem(KEY)}catch(e){return null}}, set(v){try{v?localStorage.setItem(KEY,v):localStorage.removeItem(KEY)}catch(e){}}};
+const bytes = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+let data = null, onlyGap = true;
+
+async function open(pass){
+  const pack = await (await fetch('data.json?t=' + Date.now(), {cache:'no-store'})).json();
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey({name:'PBKDF2', hash:'SHA-256', salt:bytes(pack.salt), iterations:pack.iter}, base, {name:'AES-GCM', length:256}, false, ['decrypt']);
+  const plain = await crypto.subtle.decrypt({name:'AES-GCM', iv:bytes(pack.iv)}, key, bytes(pack.data));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+function el(tag, cls, text){const n=document.createElement(tag); if(cls) n.className=cls; if(text!=null) n.textContent=text; return n;}
+const sg = () => new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Singapore'}).format(new Date());
+const plus = (iso,n) => {const d=new Date(iso+'T00:00:00Z'); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10);};
+function dayName(iso){
+  const d = new Date(iso+'T00:00:00Z'), t = sg();
+  const head = iso===t ? '今天 ' : iso===plus(t,1) ? '明天 ' : '';
+  const year = iso.slice(0,4)!==t.slice(0,4) ? iso.slice(0,4)+'年' : '';
+  return `${head}${year}${d.getUTCMonth()+1}月${d.getUTCDate()}日 周${'日一二三四五六'[d.getUTCDay()]}`;
+}
+let toastTimer;
+function toast(t){$('toast').textContent=t; $('toast').hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('toast').hidden=true, 3500);}
+async function report(r){
+  const text = `【顶班】${dayName(r.date).replace(/^(今天|明天) /,'')} ${r.site} ${r.tc}（${r.who} 休）\n顶班人：\n电话：`;
+  try{ if(navigator.share){ await navigator.share({text}); return; } }catch(e){ if(e.name==='AbortError') return; }
+  try{ await navigator.clipboard.writeText(text); toast('已复制，到群里粘贴并填上名字电话'); }catch(e){ prompt('复制下面这段发到群里', text); }
+}
+function card(r){
+  const c = el('div', 'card' + (r.rep ? '' : ' gap')), b = el('div','body');
+  b.append(el('div','where', `${r.site} ${r.tc}`.trim()));
+  const who = el('div','who', `${r.who} 休息${r.part ? '（'+r.part+'）' : ''}`);
+  if(r.pending) who.append(el('span','tag','请假待确认'));
+  b.append(who, el('div','state', r.rep ? `${r.rep} 顶班` : '还没人顶'));
+  c.append(b);
+  if(!r.rep){ const a = el('button','act','报顶班'); a.type='button'; a.onclick=()=>report(r); c.append(a); }
+  else if(r.tel){ const a = el('a','act','打电话'); a.href='tel:'+r.tel.replace(/[^\d+]/g,''); c.append(a); }
+  return c;
+}
+function draw(){
+  const today = sg(), q = $('q').value.trim().toLowerCase();
+  const future = data.rows.filter(r => r.date >= today);
+  const gaps = d => future.filter(r => r.date===d && !r.rep).length;
+  const word = n => n ? `缺 ${n} 人` : '不缺人';
+  $('sub').replaceChildren('今天 ', el('b','',word(gaps(today))), '，明天 ', el('b','',word(gaps(plus(today,1)))), `。更新于 ${data.updated}。`);
+  const shown = future.filter(r => (!onlyGap || !r.rep) && (!q || `${r.site} ${r.tc} ${r.who} ${r.rep}`.toLowerCase().includes(q)));
+  const list = $('list'); list.replaceChildren();
+  let last = '';
+  for(const r of shown){
+    if(r.date !== last){ last = r.date; const h = el('h2','',dayName(r.date)); h.append(el('span','',word(gaps(r.date)))); list.append(h); }
+    list.append(card(r));
+  }
+  if(!shown.length) list.append(el('p','empty', q ? '没找到。' : '没有缺人的日子。'));
+  $('fGap').setAttribute('aria-pressed', onlyGap); $('fAll').setAttribute('aria-pressed', !onlyGap);
+}
+function key(){
+  const m = location.hash.match(/k=([A-Za-z0-9_-]+)/);
+  return m ? m[1] : store.get();
+}
+async function load(){
+  const k = key();
+  if(!k){ $('sub').textContent = '请用群里发的完整链接打开。'; return; }
+  try{ data = await open(k); }
+  catch(e){ $('app').hidden = true; $('sub').textContent = e.name==='OperationError' ? '这个链接已经失效，请要一个新链接。' : '打不开，请检查网络后再试。'; return; }
+  store.set(k); $('app').hidden = false; draw();
+}
+$('fGap').onclick = () => { onlyGap = true; draw(); };
+$('fAll').onclick = () => { onlyGap = false; draw(); };
+$('q').oninput = draw;
+window.addEventListener('hashchange', load);
+document.addEventListener('visibilitychange', () => { if(!document.hidden) load(); });
+load();
+})();
+</script>
+</body>
+</html>
