@@ -119,9 +119,14 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .calendar-day[aria-current=date]:not([aria-pressed=true]){outline:1px solid var(--rule);outline-offset:-2px}
 .calendar-selection{margin:6px 2px 0;color:var(--ink-soft);font-size:13px}
 .leave-full{margin:3px 0 0!important}
+.directory-jump{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.directory-jump button{justify-content:center;white-space:nowrap}
+.driver-section{scroll-margin-top:74px}
+.driver-section h2{margin-top:14px}
 .site-heading{align-items:center}
 .site-heading .site-tools{display:flex;align-items:center;gap:7px;flex:none}
 .site-heading .site-tools>span{white-space:nowrap}
+.site-heading .site-name{flex:1;min-width:0;color:inherit;font:inherit;text-decoration:none}
 .site-heading .nav-link{min-height:40px;width:42px;justify-content:center}
 .nav-arrow{display:block;transform:rotate(-36deg);font-size:21px!important;color:var(--brand)!important}
 .leave-item{border-top:1px solid var(--rule-soft);margin-top:9px;padding-top:8px}
@@ -140,7 +145,11 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
         <button id="jumpToday" class="action" type="button">今天</button><button id="jumpTomorrow" class="action" type="button">明天</button>
         <label class="date-choice">日历 <input id="coverageDate" type="date"></label>
       </div>
-      <div class="filters" id="kind" role="group" aria-label="能开的机型"><button class="chip" id="kAll" type="button">全部</button><button class="chip" id="kFlat" type="button">平桥</button><button class="chip" id="kLuff" type="button">上下桥</button></div>
+      <div class="directory-jump" id="directoryJump" role="group" aria-label="司机分类" hidden>
+        <button class="action" type="button" data-driver-group="spass">S Pass</button>
+        <button class="action" type="button" data-driver-group="local">本地司机</button>
+        <button class="action" type="button" data-driver-group="relief">替班司机</button>
+      </div>
       <div class="daybar" id="daybar"><button type="button" id="prev" aria-label="前一天">‹</button><strong id="day"></strong><button type="button" id="next" aria-label="后一天">›</button></div>
       <div class="filters" id="when" role="group" aria-label="时间"><button class="chip" id="wNext" type="button">即将</button><button class="chip" id="wPast" type="button">本月已过</button></div>
     </div>
@@ -151,7 +160,7 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
       <button class="chip" id="tToday" type="button"><span class="tab-en" lang="en">Schedule</span>今日排班</button>
       <button class="chip" id="tGap" type="button"><span class="tab-en" lang="en">Coverage</span>待替班<span class="badge" id="nGap" hidden></span></button>
       <button class="chip" id="tLeave" type="button"><span class="tab-en" lang="en">Leave</span>休假记录</button>
-      <button class="chip" id="tOperators" type="button"><span class="tab-en" lang="en">Relief</span>替班司机</button>
+      <button class="chip" id="tOperators" type="button"><span class="tab-en" lang="en">Drivers</span>司机信息库</button>
     </div></nav>
   </main>
 </div>
@@ -243,48 +252,50 @@ function coverageCard(r){
 }
 function coverageActions(row){
   const actions = el('div','actions');
-  actions.append(action('找人', () => findRelief(row.crane)), action('复制英文邀班', () => report(row)));
+  actions.append(action('找人', findRelief), action('复制英文邀班', () => report(row)));
   return actions;
 }
-function findRelief(crane){
-  const machine = crane.startsWith('平桥') ? '平桥' : crane.startsWith('上下桥') ? '上下桥' : '';
-  switchTab('operators', machine, machine ? '' : '该机位机型待核，以下为全部替班司机。');
+function jumpDriverGroup(group){
+  $('drivers-' + group)?.scrollIntoView({behavior:'auto',block:'start'});
+}
+function findRelief(){
+  switchTab('operators');
+  jumpDriverGroup('relief');
 }
 const LABEL = {ok:'', cover:'顶班', gap:'待替班', open:'没排人', rest:'休', none:'无人'};
 const TABS = {tToday:'today', tGap:'gap', tLeave:'leave', tOperators:'operators'};
-let tab = 'today', past = false, dayAt = null, kind = '', reliefHint = '', coverageDate = '';
+let tab = 'today', past = false, dayAt = null, coverageDate = '';
 let leaveMonth = '', leaveDate = '';
-function switchTab(next, machine='', hint=''){
+function switchTab(next){
   tab = next;
   dayAt = null;
-  kind = machine;
-  reliefHint = hint;
   window.scrollTo(0, 0);
   draw();
 }
 function drawOperators(list){
-  if(reliefHint) list.append(el('p','hint',reliefHint));
-  const found = data.operators || [];
-  const order = (a,b) => (!!b.phone - !!a.phone) || (b.types.length - a.types.length) || a.name.localeCompare(b.name);
-  const sure = found.filter(p => !kind || p.types.includes(kind)).sort(order);
-  const unsure = kind ? found.filter(p => !p.types.length).sort(order) : [];
-  const people = [...sure, ...unsure];
-  if(kind && !sure.length) list.append(el('p','empty', `没有登记能开${kind}的替班司机。`));
-  for(const p of people){
-    if(kind && p === unsure[0]) list.append(el('h2','','机型待确认'));
-    const box = el('article','person'), line = el('div','line');
-    const heading = el('div','relief-heading');
-    heading.append(el('h3','',p.name));
-    const labels = {'平桥':'Saddle Jib','上下桥':'Luffing Jib'};
-    for(const kind of p.types) if(labels[kind]) heading.append(chip(labels[kind]));
-    line.append(heading);
-    if(p.phone) line.append(whatsappLink(p.phone));
-    box.append(line);
-    for(const x of [p.note, p.area && '居住位置：' + p.area, p.phone && '手机：' + pretty(p.phone)].filter(Boolean))
-      box.append(el('div','detail',x));
-    list.append(box);
+  const people = data.operators || [];
+  const labels = {'平桥':'Saddle Jib','上下桥':'Luffing Jib'};
+  for(const [group,title] of [['spass','S Pass'],['local','本地司机'],['relief','替班司机']]){
+    const section = el('section','driver-section');
+    section.id = 'drivers-' + group;
+    section.append(el('h2','',title));
+    const groupPeople = people.filter(person => (person.group || 'relief') === group)
+      .sort((a,b) => (!!b.phone - !!a.phone) || a.name.localeCompare(b.name));
+    for(const p of groupPeople){
+      const box = el('article','person'), line = el('div','line');
+      const heading = el('div','relief-heading');
+      heading.append(el('h3','',p.name));
+      for(const type of p.types) if(labels[type]) heading.append(chip(labels[type]));
+      line.append(heading);
+      if(p.phone) line.append(whatsappLink(p.phone));
+      box.append(line);
+      for(const detail of [p.note, p.area && '居住位置：' + p.area, p.phone && '手机：' + pretty(p.phone)].filter(Boolean))
+        box.append(el('div','detail',detail));
+      section.append(box);
+    }
+    if(!groupPeople.length) section.append(el('p','empty','本组暂无记录。'));
+    list.append(section);
   }
-  if(!people.length && !kind) list.append(el('p','empty', '暂无替班司机记录。'));
 }
 function dateRanges(dates){
   const ranges = [];
@@ -420,18 +431,19 @@ function drawCoverage(list, dates, gaps){
     list.append(block);
   }
 }
+function mapsUrl(destination){
+  // 坐标里的逗号保持原样。编码后苹果地图会把它当成地名搜索。
+  return 'https://maps.apple.com/?daddr=' + destination + '&dirflg=d';
+}
 function navigationLink(site){
   const link = el('a','action nav-link');
   const icon = el('span','nav-arrow','➤');
   icon.setAttribute('aria-hidden','true');
   link.append(icon);
-  const url = new URL('https://maps.apple.com/directions');
-  url.searchParams.set('destination',site.navigation);
-  link.href = url.href;
+  link.href = mapsUrl(site.navigation);
   link.rel = 'noopener noreferrer';
-  const destination = site.navigation.startsWith('Jurong Island Checkpoint') ? '裕廊岛入口' : site.site;
-  link.setAttribute('aria-label', '用 Apple Maps 导航到' + destination);
-  link.title = '导航到' + destination;
+  link.setAttribute('aria-label', '用 Apple Maps 导航到' + site.site);
+  link.title = '导航到' + site.site;
   return link;
 }
 function slotRow(x){
@@ -463,7 +475,14 @@ function drawToday(list){
   for(const s of d.sites){
     if(!s.slots.length) continue;
     shown++;
-    const box = el('section','site'), h = el('h3','site-heading',s.site);
+    const box = el('section','site'), h = el('h3','site-heading');
+    if(s.navigation){
+      const name = el('a','site-name', s.site);
+      name.href = mapsUrl(s.navigation);
+      name.rel = 'noopener noreferrer';
+      name.setAttribute('aria-label', '用 Apple Maps 导航到' + s.site);
+      h.append(name);
+    } else h.append(document.createTextNode(s.site));
     const tools = el('span','site-tools'), n = s.slots.filter(x=>x.state==='gap').length;
     if(s.rest || n) tools.append(el('span','', s.rest ? '工地休' : `待替班 ${n}`));
     if(s.navigation) tools.append(navigationLink(s));
@@ -488,8 +507,7 @@ function draw(){
   $('daybar').hidden = tab !== 'today'; $('when').hidden = tab !== 'leave';
   $('leaveCalendar').hidden = tab !== 'leave';
   $('coverageJump').hidden = tab !== 'gap';
-  $('kind').hidden = tab !== 'operators';
-  for(const [id,value] of [['kAll',''],['kFlat','平桥'],['kLuff','上下桥']]) $(id).setAttribute('aria-pressed', kind===value);
+  $('directoryJump').hidden = tab !== 'operators';
   $('wNext').setAttribute('aria-pressed', !past); $('wPast').setAttribute('aria-pressed', past);
   $('foot').hidden = false;
   $('foot').textContent = tab === 'operators' ? '派工前请核对证件类别及有效期。' : '这是计划排班。机型带「推定」的，派工前先确认。';
@@ -529,7 +547,9 @@ async function load(){
   store.set(k); $('app').hidden = false; draw();
 }
 for(const [id,next] of Object.entries(TABS)) $(id).onclick = () => switchTab(next);
-for(const [id,value] of [['kAll',''],['kFlat','平桥'],['kLuff','上下桥']]) $(id).onclick = () => { kind = value; draw(); };
+for(const button of $('directoryJump').querySelectorAll('button')){
+  button.onclick = () => jumpDriverGroup(button.dataset.driverGroup);
+}
 $('jumpToday').onclick = () => jumpCoverage(sg());
 $('jumpTomorrow').onclick = () => jumpCoverage(plus(sg(),1));
 $('coverageDate').onchange = event => jumpCoverage(event.target.value);
