@@ -82,6 +82,11 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .nm summary small{color:var(--ink-faint);font-weight:400;margin-left:6px}
 .detail{font-size:13px;color:var(--ink-soft);line-height:1.4;margin-top:4px}
 .call{flex:none;min-width:48px;min-height:40px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--rule);border-radius:10px;background:var(--surface);color:var(--brand);font:600 14px var(--sans);text-decoration:none}
+.contact-actions{display:inline-flex;gap:5px;flex:0 0 auto}
+.contact-actions .call{padding:0 7px;font-size:12px}
+.slot .contact-actions{flex-direction:column;align-items:stretch}
+.relief-heading{display:flex;flex-wrap:wrap;align-items:center;gap:5px}
+.person .line{align-items:flex-start}
 .who{color:var(--ink)}
 .line{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
 .line .state{margin:0}
@@ -95,7 +100,8 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .site-heading{align-items:center}
 .site-heading .site-tools{display:flex;align-items:center;gap:7px;flex:none}
 .site-heading .site-tools>span{white-space:nowrap}
-.site-heading .nav-link{min-height:40px;white-space:nowrap}
+.site-heading .nav-link{min-height:40px;width:42px;justify-content:center}
+.nav-arrow{display:block;transform:rotate(-36deg);font-size:21px!important;color:var(--brand)!important}
 .leave-item{border-top:1px solid var(--rule-soft);margin-top:9px;padding-top:8px}
 .leave-item p{margin:3px 0;font-size:14px}
 .leave-item .tag{margin-left:5px}
@@ -159,10 +165,6 @@ async function report(r){
     (/^\d{1,2}:\d{2}–\d{1,2}:\d{2}$/.test(r.part || '') ? ' from ' + r.part.replace('–',' to ') : '');
   const crane = r.tc ? ' (tower crane ' + r.tc + ')' : '';
   const text = `Hi, could you help cover a tower crane shift at ${site}${crane} on ${date}${shift}? Please let me know if you're available. Thank you!`;
-  if(navigator.share){
-    try{ await navigator.share({text}); return; }
-    catch(e){ if(e.name==='AbortError') return; }
-  }
   try{ await navigator.clipboard.writeText(text); toast('英文消息已复制'); }
   catch(e){ prompt('复制英文消息', text); }
 }
@@ -170,8 +172,20 @@ function action(label, run){
   const b = el('button','action',label); b.type = 'button'; b.onclick = run; return b;
 }
 function chip(text){ return el('span', 'chiptype' + (text.includes('待核') ? ' unknown' : ''), text); }
-function callButton(phone){
-  const a = el('a','call','打电话'); a.href = 'tel:' + phone.replace(/[^\d+]/g,''); return a;
+function contacts(phone, name){
+  const group = el('div','contact-actions');
+  const call = el('a','call','Call');
+  call.href = 'tel:' + phone.replace(/[^\d+]/g,'');
+  const whatsapp = el('a','call','WhatsApp');
+  whatsapp.href = 'https://wa.me/' + phone.replace(/\D/g,'');
+  whatsapp.target = '_blank';
+  whatsapp.rel = 'noopener noreferrer';
+  if(name){
+    call.setAttribute('aria-label','Call ' + name);
+    whatsapp.setAttribute('aria-label','WhatsApp ' + name);
+  }
+  group.append(call, whatsapp);
+  return group;
 }
 const info = name => (data.people || {})[name] || {full:'', types:[], certificates:[]};
 const pretty = phone => phone.replace(/^\+65(\d{4})(\d{4})$/, '+65 $1 $2');
@@ -194,12 +208,12 @@ function card(r, past){
   b.append(who);
   const line = el('div','line');
   line.append(el('div','state', r.rep ? `${r.rep} 顶班` : past ? '没记顶班' : '待替班'));
-  if(r.rep && r.rep_phone && !past) line.append(callButton(r.rep_phone));
+  if(r.rep && r.rep_phone && !past) line.append(contacts(r.rep_phone, r.rep));
   b.append(line);
   if(!past && !r.rep){
     const actions = el('div','actions');
     actions.append(action('找能顶的司机', () => findRelief(r.crane)), action('Message', () => report(r)));
-    if(r.who_phone) actions.append(Object.assign(callButton(r.who_phone), {textContent:'打给' + r.who}));
+    if(r.who_phone) actions.append(contacts(r.who_phone, r.who));
     b.append(actions);
   }
   c.append(b);
@@ -228,18 +242,17 @@ function drawOperators(list){
   const people = [...sure, ...unsure];
   if(kind && !sure.length) list.append(el('p','empty', `没有登记能开${kind}的替班司机。`));
   for(const p of people){
-    if(kind && p === unsure[0]) list.append(el('h2','', `下面 ${unsure.length} 人机型没登记，打电话确认`));
+    if(kind && p === unsure[0]) list.append(el('h2','','机型待确认'));
     const box = el('article','person'), line = el('div','line');
-    line.append(el('h3','',p.name));
-    if(p.phone) line.append(callButton(p.phone));
+    const heading = el('div','relief-heading');
+    heading.append(el('h3','',p.name));
+    const labels = {'平桥':'Saddle Jib','上下桥':'Luffing Jib'};
+    for(const kind of p.types) if(labels[kind]) heading.append(chip(labels[kind]));
+    line.append(heading);
+    if(p.phone) line.append(contacts(p.phone, p.name));
     box.append(line);
-    const tags = el('p');
-    if(p.types.length) for(const k of p.types){ tags.append(chip(k), ' '); } else tags.append(chip('机型待核'));
-    tags.append(` ${p.area || '区域未登记'}`);
-    box.append(tags);
-    const d = el('details'); d.append(el('summary','hint','详情'));
-    for(const x of [p.note, p.phone && '手机：' + pretty(p.phone), ...p.certificates].filter(Boolean)) d.append(el('div','detail',x));
-    box.append(d);
+    for(const x of [p.note, p.area && '居住位置：' + p.area, p.phone && '手机：' + pretty(p.phone)].filter(Boolean))
+      box.append(el('div','detail',x));
     list.append(box);
   }
   if(!people.length && !kind) list.append(el('p','empty', '暂无替班司机记录。'));
@@ -311,14 +324,17 @@ function drawCoverage(list, dates, gaps){
   }
 }
 function navigationLink(site){
-  const link = el('a','action nav-link','导航');
-  const url = new URL('https://www.google.com/maps/dir/');
-  url.searchParams.set('api','1');
+  const link = el('a','action nav-link');
+  const icon = el('span','nav-arrow','➤');
+  icon.setAttribute('aria-hidden','true');
+  link.append(icon);
+  const url = new URL('https://maps.apple.com/directions');
   url.searchParams.set('destination',site.navigation);
   link.href = url.href;
-  link.target = '_blank';
   link.rel = 'noopener noreferrer';
-  link.setAttribute('aria-label', '导航到' + site.site);
+  const destination = site.navigation.startsWith('Jurong Island Checkpoint') ? '裕廊岛入口' : site.site;
+  link.setAttribute('aria-label', '用 Apple Maps 导航到' + destination);
+  link.title = '导航到' + destination;
   return link;
 }
 function slotRow(x, message){
@@ -329,7 +345,7 @@ function slotRow(x, message){
   else nm.textContent = x.state==='none' ? '—' : x.state==='open' ? '？' : '';
   row.append(tc, nm);
   if(LABEL[x.state]) row.append(el('span','st', LABEL[x.state]));
-  if(x.phone && (x.state==='ok' || x.state==='cover')) row.append(callButton(x.phone));
+  if(x.phone && (x.state==='ok' || x.state==='cover')) row.append(contacts(x.phone, x.name));
   if(message) row.append(action('Message', message));
   return row;
 }
