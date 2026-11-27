@@ -126,16 +126,17 @@ function dayName(iso){
 let toastTimer;
 function toast(t){$('toast').textContent=t; $('toast').hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('toast').hidden=true, 3500);}
 async function report(r){
-  const who = r.who_note ? `${r.who}（${r.who_note}）` : r.who;
-  const text = `【顶班】${dayName(r.date).replace(/^(今天|明天) /,'')} ${r.site} ${r.tc}（${who} 休）\n顶班人：`;
+  const text = `【顶班】${dayName(r.date).replace(/^(今天|明天) /,'')} ${r.site} ${r.tc}（${r.who} 休）\n顶班人：`;
   try{ await navigator.clipboard.writeText(text); toast('已复制顶班信息'); }
   catch(e){ prompt('复制顶班信息', text); }
 }
 function action(label, run){
   const b = el('button','action',label); b.type = 'button'; b.onclick = run; return b;
 }
-function addNote(parent, note){
-  if(note) parent.append(el('p','visible-note',note));
+function addNote(parent, note, phone){
+  const number = phone ? '手机 ' + phone.replace(/^\+65(\d{4})(\d{4})$/, '+65 $1 $2') : '';
+  const detail = [number, note].filter(Boolean).join(' · ');
+  if(detail) parent.append(el('p','visible-note',detail));
 }
 function card(r, past){
   const c = el('div', 'card' + (r.rep || past ? '' : ' gap')), b = el('div','body');
@@ -143,9 +144,9 @@ function card(r, past){
   const who = el('div','who', `${r.who} 休假${r.part ? '（'+r.part+'）' : ''}`);
   if(r.pending) who.append(el('span','tag','请假待确认'));
   b.append(who);
-  addNote(b, r.who_note);
+  addNote(b, r.who_note, r.who_phone);
   b.append(el('div','state', r.rep ? `${r.rep} 顶班` : past ? '没记顶班' : '待替班'));
-  addNote(b, r.rep_note);
+  addNote(b, r.rep_note, r.rep_phone);
   c.append(b);
   if(!past && !r.rep){
     const actions = el('div','actions');
@@ -181,7 +182,7 @@ function drawOperators(list, q){
     for(const p of people){
       const box = el('article','person');
       box.append(el('h3','',p.name));
-      addNote(box, p.note);
+      addNote(box, p.note, p.phone);
       const cert = el('p','', '塔吊证件');
       cert.append(el('strong','', p.certificates?.join('；') || '资料待补'));
       box.append(cert);
@@ -218,7 +219,7 @@ function drawToday(list, q){
     box.append(h);
     for(const x of slots){
       const row = el('div','slot ' + x.state), nm = el('div','nm', x.name || (x.state==='none' ? '—' : x.state==='open' ? '？' : ''));
-      addNote(nm, x.note);
+      addNote(nm, x.note, x.phone);
       row.append(el('span','tc', `${x.tc}${x.shift ? ' '+x.shift : ''}`), nm, el('span','st', LABEL[x.state]));
       box.append(row);
     }
