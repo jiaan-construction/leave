@@ -25,8 +25,7 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.02em;margin:0;line-height:1.1
 .sub p{margin:0}
 .sub b{color:var(--ink)}
 .controls{position:sticky;top:0;z-index:5;background:var(--ground);padding:11px 0 12px;border-bottom:1px solid var(--rule-soft);display:flex;flex-direction:column;gap:8px}
-input[type=search],input[type=password]{width:100%;height:52px;padding:0 16px;font:400 17px/1 var(--sans);color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:12px}
-input:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:transparent}
+.controls:not(:has(> :not([hidden]))){display:none}
 .filters{display:flex;gap:3px;padding:3px;background:var(--surface-2);border:1px solid var(--rule);border-radius:11px}
 .chip{flex:1;min-height:44px;font:600 15px var(--sans);color:var(--ink-soft);background:transparent;border:0;border-radius:9px;cursor:pointer}
 .chip[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(17,17,17,.14)}
@@ -87,6 +86,19 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .line{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
 .line .state{margin:0}
 .need{margin-top:3px;font-size:14px;color:var(--ink-soft)}
+.coverage-day{margin-top:14px;padding:12px;border:1px solid var(--rule);border-radius:15px;background:var(--surface-2)}
+.coverage-day h2{margin:0 0 10px;color:var(--ink);border-color:var(--rule)}
+.coverage-day h3{font-size:15px;margin:10px 0 6px}
+.coverage-day .site h4{margin:0;padding:10px 14px;font-size:15px;background:var(--surface-2)}
+.coverage-day .empty{margin:10px 0;text-align:left}
+.coverage-day .card:last-child{margin-bottom:0}
+.site-heading{align-items:center}
+.site-heading .site-tools{display:flex;align-items:center;gap:7px;flex:none}
+.site-heading .site-tools>span{white-space:nowrap}
+.site-heading .nav-link{min-height:40px;white-space:nowrap}
+.leave-item{border-top:1px solid var(--rule-soft);margin-top:9px;padding-top:8px}
+.leave-item p{margin:3px 0;font-size:14px}
+.leave-item .tag{margin-left:5px}
 </style>
 </head>
 <body>
@@ -99,7 +111,6 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
       <div class="filters" id="kind" role="group" aria-label="能开的机型"><button class="chip" id="kAll" type="button">全部</button><button class="chip" id="kFlat" type="button">平桥</button><button class="chip" id="kLuff" type="button">上下桥</button></div>
       <div class="daybar" id="daybar"><button type="button" id="prev" aria-label="前一天">‹</button><strong id="day"></strong><button type="button" id="next" aria-label="后一天">›</button></div>
       <div class="filters" id="when" role="group" aria-label="时间"><button class="chip" id="wNext" type="button">即将</button><button class="chip" id="wPast" type="button">本月已过</button></div>
-      <input type="search" id="q" placeholder="搜工地、塔吊或名字…" aria-label="搜工地、塔吊或名字" autocomplete="off">
     </div>
     <div id="list"></div>
     <p class="foot" id="foot"></p>
@@ -139,9 +150,21 @@ function dayName(iso){
 let toastTimer;
 function toast(t){$('toast').textContent=t; $('toast').hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('toast').hidden=true, 3500);}
 async function report(r){
-  const text = `【顶班】${dayName(r.date).replace(/^(今天|明天) /,'')} ${r.site} ${r.tc}（${r.who} 休）\n顶班人：`;
-  try{ await navigator.clipboard.writeText(text); toast('已复制顶班信息'); }
-  catch(e){ prompt('复制顶班信息', text); }
+  if(!r.tc || r.site === '工地待核'){ toast('请先核对工地和塔吊号'); return; }
+  const site = r.site.replace(/（[^）]+）$/, '');
+  const date = new Intl.DateTimeFormat('en-GB', {weekday:'long', day:'numeric', month:'long', year:'numeric', timeZone:'UTC'})
+    .format(new Date(r.date+'T00:00:00Z'));
+  const shift = {'上午':' for the morning shift', '下午':' for the afternoon shift', '白':' for the day shift',
+                 '日':' for the day shift', '夜':' for the night shift'}[r.part || r.shift] ||
+    (/^\d{1,2}:\d{2}–\d{1,2}:\d{2}$/.test(r.part || '') ? ' from ' + r.part.replace('–',' to ') : '');
+  const crane = r.tc ? ' (tower crane ' + r.tc + ')' : '';
+  const text = `Hi, could you help cover a tower crane shift at ${site}${crane} on ${date}${shift}? Please let me know if you're available. Thank you!`;
+  if(navigator.share){
+    try{ await navigator.share({text}); return; }
+    catch(e){ if(e.name==='AbortError') return; }
+  }
+  try{ await navigator.clipboard.writeText(text); toast('英文消息已复制'); }
+  catch(e){ prompt('复制英文消息', text); }
 }
 function action(label, run){
   const b = el('button','action',label); b.type = 'button'; b.onclick = run; return b;
@@ -175,7 +198,7 @@ function card(r, past){
   b.append(line);
   if(!past && !r.rep){
     const actions = el('div','actions');
-    actions.append(action('找能顶的司机', () => findRelief(r.crane)), action('复制顶班信息', () => report(r)));
+    actions.append(action('找能顶的司机', () => findRelief(r.crane)), action('Message', () => report(r)));
     if(r.who_phone) actions.append(Object.assign(callButton(r.who_phone), {textContent:'打给' + r.who}));
     b.append(actions);
   }
@@ -190,17 +213,15 @@ function findRelief(crane){
 const LABEL = {ok:'', cover:'顶班', gap:'待替班', open:'没排人', rest:'休', none:'无人'};
 const TABS = {tToday:'today', tGap:'gap', tLeave:'leave', tOperators:'operators'};
 let tab = 'today', past = false, dayAt = null, kind = '';
-const match = (q, ...parts) => q.split(/\s+/).every(word => parts.join(' ').toLowerCase().includes(word));
 function switchTab(next){
-  if(tab !== next) $('q').value = '';
   tab = next;
   dayAt = null;
   kind = '';
   window.scrollTo(0, 0);
   draw();
 }
-function drawOperators(list, q){
-  const found = (data.operators || []).filter(p => match(q, p.name, p.note, p.area, ...p.types, ...p.certificates));
+function drawOperators(list){
+  const found = data.operators || [];
   const order = (a,b) => (!!b.phone - !!a.phone) || (b.types.length - a.types.length) || a.name.localeCompare(b.name);
   const sure = found.filter(p => !kind || p.types.includes(kind)).sort(order);
   const unsure = kind ? found.filter(p => !p.types.length).sort(order) : [];
@@ -221,16 +242,86 @@ function drawOperators(list, q){
     box.append(d);
     list.append(box);
   }
-  if(!people.length && !kind) list.append(el('p','empty', q || kind ? '没有找到符合条件的司机。' : '暂无替班司机记录。'));
+  if(!people.length && !kind) list.append(el('p','empty', '暂无替班司机记录。'));
 }
-function grouped(list, rows, make, headNote){
-  let last = '';
+function dateRanges(dates){
+  const ranges = [];
+  for(const date of [...new Set(dates)].sort()){
+    const last = ranges.at(-1);
+    if(last && plus(last[1],1) === date) last[1] = date;
+    else ranges.push([date,date]);
+  }
+  return ranges;
+}
+function compactDate(iso){
+  const [year,month,day] = iso.split('-').map(Number);
+  return `${year!==Number(sg().slice(0,4)) ? year+'年' : ''}${month}月${day}日`;
+}
+function drawLeave(list, rows){
+  const people = new Map();
   for(const r of rows){
-    if(r.date !== last){ last = r.date; const h = el('h2','',dayName(r.date)); if(headNote) h.append(el('span','',headNote(r.date))); list.append(h); }
-    list.append(make(r));
+    const person = r.person_group || JSON.stringify([r.who,r.site,r.tc]);
+    if(!people.has(person)) people.set(person, {name:r.who, entries:new Map()});
+    const entries = people.get(person).entries;
+    const key = JSON.stringify([r.site,r.tc,r.part || '',!!r.pending,r.rep || '']);
+    if(!entries.has(key)) entries.set(key, {r, dates:[]});
+    entries.get(key).dates.push(r.date);
+  }
+  for(const {name,entries} of people.values()){
+    const box = el('article','person leave-person');
+    box.append(el('h3','',name));
+    for(const {r,dates} of entries.values()){
+      const item = el('div','leave-item');
+      item.append(el('strong','',r.site + ' · ' + (r.tc || '塔吊待核')));
+      const dateText = r.part ? [...new Set(dates)].sort().map(date => compactDate(date) + '（' + r.part + '）') :
+        dateRanges(dates).map(([start,end]) => start === end ? compactDate(start) : compactDate(start) + '–' + compactDate(end));
+      const line = el('p','leave-dates',dateText.join('、'));
+      if(r.pending) line.append(el('span','tag','待确认'));
+      item.append(line);
+      if(r.rep) item.append(el('p','',r.rep+' 顶班'));
+      box.append(item);
+    }
+    list.append(box);
+  }
+  if(!people.size) list.append(el('p','empty','没有休假记录。'));
+}
+function drawCoverage(list, dates, gaps){
+  for(const date of dates){
+    const leave = gaps.filter(r => r.date === date);
+    const open = openSlots(date);
+    const block = el('section','coverage-day');
+    block.append(el('h2','',dayName(date)));
+    if(leave.length){
+      block.append(el('h3','',`待替班 ${leave.length}`));
+      for(const row of leave) block.append(card(row, false));
+    }
+    if(open.length){
+      block.append(el('h3','',`没排人 ${open.length}`));
+      for(const site of new Set(open.map(x => x.site))){
+        const box = el('section','site');
+        box.append(el('h4','',site));
+        for(const row of open.filter(x => x.site === site)){
+          box.append(slotRow(row, () => report({...row,date})));
+        }
+        block.append(box);
+      }
+    }
+    if(!leave.length && !open.length) block.append(el('p','empty','暂无待替班或未排岗位。'));
+    list.append(block);
   }
 }
-function slotRow(x){
+function navigationLink(site){
+  const link = el('a','action nav-link','导航');
+  const url = new URL('https://www.google.com/maps/dir/');
+  url.searchParams.set('api','1');
+  url.searchParams.set('destination',site.navigation);
+  link.href = url.href;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.setAttribute('aria-label', '导航到' + site.site);
+  return link;
+}
+function slotRow(x, message){
   const row = el('div','slot ' + x.state), tc = el('div','tc', `${x.tc}${x.shift ? ' '+x.shift : ''}`);
   tc.append(chip(x.crane));
   const nm = el('div','nm');
@@ -239,13 +330,14 @@ function slotRow(x){
   row.append(tc, nm);
   if(LABEL[x.state]) row.append(el('span','st', LABEL[x.state]));
   if(x.phone && (x.state==='ok' || x.state==='cover')) row.append(callButton(x.phone));
+  if(message) row.append(action('Message', message));
   return row;
 }
 function openSlots(day){
   const d = data.schedule.find(x => x.date === day);
   return d ? d.sites.flatMap(s => s.slots.filter(x => x.state==='open').map(x => ({site:s.site, ...x}))) : [];
 }
-function drawToday(list, q){
+function drawToday(list){
   const days = data.schedule.filter(d => d.date >= sg());
   if(!days.length){ list.append(el('p','empty','今天以后还没有排班记录。')); $('day').textContent=''; return; }
   let i = days.findIndex(d => d.date === dayAt); if(i < 0) i = 0;
@@ -257,24 +349,26 @@ function drawToday(list, q){
   if(d.date !== sg() && i === 0) list.append(el('p','empty','今天还没有排班记录，下面是最近的一天。'));
   let shown = 0;
   for(const s of d.sites){
-    const slots = s.slots.filter(x => match(q, s.site, x.tc, x.name, x.note));
-    if(!slots.length) continue;
+    if(!s.slots.length) continue;
     shown++;
-    const box = el('section','site'), h = el('h3','',s.site), n = slots.filter(x=>x.state==='gap').length;
-    h.append(el('span','', s.rest ? '工地休' : n ? `待替班 ${n}` : ''));
+    const box = el('section','site'), h = el('h3','site-heading',s.site);
+    const tools = el('span','site-tools'), n = s.slots.filter(x=>x.state==='gap').length;
+    if(s.rest || n) tools.append(el('span','', s.rest ? '工地休' : `待替班 ${n}`));
+    if(s.navigation) tools.append(navigationLink(s));
+    else tools.append(el('span','','位置待核'));
+    h.append(tools);
     box.append(h);
-    for(const x of slots) box.append(slotRow(x));
+    for(const x of s.slots) box.append(slotRow(x));
     list.append(box);
   }
   if(!shown) list.append(el('p','empty','没找到。'));
 }
 function draw(){
-  const today = sg(), q = $('q').value.trim().toLowerCase();
+  const today = sg();
   const tomorrow = plus(today,1);
   const future = data.rows.filter(r => r.date >= today);
   const gapRows = future.filter(r => r.date <= tomorrow && !r.rep);
   const gaps = d => gapRows.filter(r => r.date===d).length;
-  const word = n => n ? `缺 ${n} 人` : '不缺人';
   const summary = (label, d) => {
     const p = el('p','', label), open = openSlots(d).length;
     p.append(el('b','', gaps(d) ? `待替班 ${gaps(d)}` : '休假都有人顶'), open ? `，没排人 ${open}` : '');
@@ -287,32 +381,15 @@ function draw(){
   $('daybar').hidden = tab !== 'today'; $('when').hidden = tab !== 'leave';
   $('kind').hidden = tab !== 'operators';
   for(const [id,value] of [['kAll',''],['kFlat','平桥'],['kLuff','上下桥']]) $(id).setAttribute('aria-pressed', kind===value);
-  const prompt = tab === 'operators' ? '搜姓名或区域' : '搜工地、塔吊或名字';
-  $('q').placeholder = prompt + '…';
-  $('q').setAttribute('aria-label', prompt);
   $('wNext').setAttribute('aria-pressed', !past); $('wPast').setAttribute('aria-pressed', past);
   $('foot').hidden = false;
   $('foot').textContent = tab === 'operators' ? '派工前请核对证件类别及有效期。' : '这是计划排班。机型带「推定」的，派工前先确认。';
   const list = $('list'); list.replaceChildren();
-  if(tab === 'today'){ drawToday(list, q); return; }
-  if(tab === 'operators'){ drawOperators(list, q); return; }
-  const source = tab === 'gap' ? gapRows : past ? data.past.filter(r => r.date < today) : future;
-  const rows = source.filter(r => match(q, r.site, r.tc, r.crane, r.who, r.rep));
-  const old = tab === 'leave' && past;
-  grouped(list, rows, r => card(r, old), tab === 'gap' ? d => word(gaps(d)) : null);
-  if(!rows.length) list.append(el('p','empty', q ? '没找到。' : tab==='gap' ? '今天和明天的休假都有人顶。' : '没有记录。'));
-  if(tab === 'gap'){
-    for(const d of [today, tomorrow]){
-      const open = openSlots(d).filter(x => match(q, x.site, x.tc, x.crane));
-      if(!open.length) continue;
-      list.append(el('h2','', `${dayName(d)} 没排人 ${open.length}`));
-      for(const s of [...new Set(open.map(x => x.site))]){
-        const box = el('section','site'); box.append(el('h3','',s));
-        for(const x of open.filter(y => y.site===s)) box.append(slotRow(x));
-        list.append(box);
-      }
-    }
-  }
+  if(tab === 'today'){ drawToday(list); return; }
+  if(tab === 'operators'){ drawOperators(list); return; }
+  if(tab === 'gap'){ drawCoverage(list, [today,tomorrow], gapRows); return; }
+  drawLeave(list, past ? data.past.filter(r => r.date < today) : future);
+
 }
 function key(){
   const m = location.hash.match(/k=([A-Za-z0-9_-]+)/);
@@ -329,7 +406,6 @@ for(const [id,next] of Object.entries(TABS)) $(id).onclick = () => switchTab(nex
 for(const [id,value] of [['kAll',''],['kFlat','平桥'],['kLuff','上下桥']]) $(id).onclick = () => { kind = value; draw(); };
 $('wNext').onclick = () => { past = false; draw(); };
 $('wPast').onclick = () => { past = true; draw(); };
-$('q').oninput = () => draw();
 window.addEventListener('hashchange', load);
 document.addEventListener('visibilitychange', () => { if(!document.hidden) load(); });
 load();
