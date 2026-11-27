@@ -18,10 +18,11 @@
 body{margin:0;background:var(--ground);color:var(--ink);font:17px/1.47 var(--sans);-webkit-font-smoothing:antialiased}
 .wrap{max-width:760px;margin:0 auto;padding:0 16px calc(105px + env(safe-area-inset-bottom,0px))}
 .masthead{display:flex;align-items:center;gap:14px;padding:14px 0 6px}
-.masthead img{width:48px;height:48px;flex:none}
+.masthead img{width:38px;height:38px;flex:none}
 .eyebrow{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--brand);margin:0 0 4px}
-h1{font-size:30px;font-weight:700;letter-spacing:-.02em;margin:0;line-height:1.1}
-.sub{margin:14px 0 0;font-size:15px;color:var(--ink-soft);padding-top:13px;border-top:2px solid var(--brand)}
+h1{font-size:23px;font-weight:700;letter-spacing:-.02em;margin:0;line-height:1.1}
+.sub{margin:6px 0 0;font-size:15px;color:var(--ink-soft);padding-top:8px;border-top:2px solid var(--brand)}
+.sub p{margin:0}
 .sub b{color:var(--ink)}
 .controls{position:sticky;top:0;z-index:5;background:var(--ground);padding:11px 0 12px;border-bottom:1px solid var(--rule-soft);display:flex;flex-direction:column;gap:8px}
 input[type=search],input[type=password]{width:100%;height:52px;padding:0 16px;font:400 17px/1 var(--sans);color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:12px}
@@ -74,16 +75,28 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .person p strong{display:block;color:var(--ink);font-weight:600}.relief-group>h2{margin:20px 0 8px}#operatorTitle{margin:0;padding:0;border:0}.person h3{margin:0;font-size:18px;overflow-wrap:anywhere}
 .person p,.hint{margin:6px 0;font-size:14px;color:var(--ink-soft)}
 .actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.chiptype{display:inline-block;font-size:12px;font-weight:600;line-height:18px;padding:0 6px;border-radius:5px;background:var(--surface-2);border:1px solid var(--rule);color:var(--ink);white-space:nowrap}
+.chiptype.unknown{color:var(--ink-faint);font-weight:400}
+.slot{align-items:center}
+.tc{width:84px}.tc .chiptype{display:block;width:max-content;margin-top:2px}
+.nm summary{list-style:none;cursor:pointer;font-weight:600}.nm summary::-webkit-details-marker{display:none}
+.nm summary small{color:var(--ink-faint);font-weight:400;margin-left:6px}
+.detail{font-size:13px;color:var(--ink-soft);line-height:1.4;margin-top:4px}
+.call{flex:none;min-width:48px;min-height:40px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--rule);border-radius:10px;background:var(--surface);color:var(--brand);font:600 14px var(--sans);text-decoration:none}
+.who{color:var(--ink)}
+.line{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
+.line .state{margin:0}
+.need{margin-top:3px;font-size:14px;color:var(--ink-soft)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="masthead"><img src="data:image/png;base64,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" alt="JIA AN" width="48" height="48">
-    <div><p class="eyebrow">JIA AN Construction</p><h1>司机调度中心</h1><p class="hint" lang="en">Crane Operator Scheduling</p></div></header>
+    <div><p class="eyebrow">JIA AN Construction</p><h1>司机调度中心</h1></div></header>
   <p class="sub" id="sub">正在打开…</p>
   <main id="app" hidden>
     <div class="controls">
-      <h2 id="operatorTitle" hidden>替班司机</h2>
+      <div class="filters" id="kind" role="group" aria-label="能开的机型"><button class="chip" id="kAll" type="button">全部</button><button class="chip" id="kFlat" type="button">平桥</button><button class="chip" id="kLuff" type="button">上下桥</button></div>
       <div class="daybar" id="daybar"><button type="button" id="prev" aria-label="前一天">‹</button><strong id="day"></strong><button type="button" id="next" aria-label="后一天">›</button></div>
       <div class="filters" id="when" role="group" aria-label="时间"><button class="chip" id="wNext" type="button">即将</button><button class="chip" id="wPast" type="button">本月已过</button></div>
       <input type="search" id="q" placeholder="搜工地、塔吊或名字…" aria-label="搜工地、塔吊或名字" autocomplete="off">
@@ -133,64 +146,82 @@ async function report(r){
 function action(label, run){
   const b = el('button','action',label); b.type = 'button'; b.onclick = run; return b;
 }
-function addNote(parent, note, phone){
-  const number = phone ? '手机 ' + phone.replace(/^\+65(\d{4})(\d{4})$/, '+65 $1 $2') : '';
-  const detail = [number, note].filter(Boolean).join(' · ');
-  if(detail) parent.append(el('p','visible-note',detail));
+function chip(text){ return el('span', 'chiptype' + (text.includes('待核') ? ' unknown' : ''), text); }
+function callButton(phone){
+  const a = el('a','call','打电话'); a.href = 'tel:' + phone.replace(/[^\d+]/g,''); return a;
+}
+const info = name => (data.people || {})[name] || {full:'', types:[], certificates:[]};
+const pretty = phone => phone.replace(/^\+65(\d{4})(\d{4})$/, '+65 $1 $2');
+function details(name, phone, note){
+  const p = info(name), d = el('details'), s = el('summary','',name);
+  if(note) s.append(el('small','',note));
+  d.append(s);
+  const lines = [p.full && '全名：' + p.full, phone && '手机：' + pretty(phone),
+                 p.types.length ? '能开：' + p.types.join('、') : '能开机型：未登记', ...p.certificates];
+  for(const line of lines.filter(Boolean)) d.append(el('div','detail',line));
+  return d;
 }
 function card(r, past){
   const c = el('div', 'card' + (r.rep || past ? '' : ' gap')), b = el('div','body');
   b.append(el('div','where', `${r.site} ${r.tc}`.trim()));
+  const need = el('div','need','机位要求：'); need.append(chip(r.crane));
+  b.append(need);
   const who = el('div','who', `${r.who} 休假${r.part ? '（'+r.part+'）' : ''}`);
   if(r.pending) who.append(el('span','tag','请假待确认'));
   b.append(who);
-  addNote(b, r.who_note, r.who_phone);
-  b.append(el('div','state', r.rep ? `${r.rep} 顶班` : past ? '没记顶班' : '待替班'));
-  addNote(b, r.rep_note, r.rep_phone);
-  c.append(b);
+  const line = el('div','line');
+  line.append(el('div','state', r.rep ? `${r.rep} 顶班` : past ? '没记顶班' : '待替班'));
+  if(r.rep && r.rep_phone && !past) line.append(callButton(r.rep_phone));
+  b.append(line);
   if(!past && !r.rep){
     const actions = el('div','actions');
-    actions.append(action('复制顶班信息', () => report(r)));
+    actions.append(action('找能顶的司机', () => findRelief(r.crane)), action('复制顶班信息', () => report(r)));
+    if(r.who_phone) actions.append(Object.assign(callButton(r.who_phone), {textContent:'打给' + r.who}));
     b.append(actions);
   }
+  c.append(b);
   return c;
 }
-const LABEL = {ok:'计划', cover:'顶班', gap:'待替班', open:'待安排', rest:'休', none:'无人'};
+function findRelief(crane){
+  switchTab('operators');
+  kind = crane.startsWith('平桥') ? '平桥' : crane.startsWith('上下桥') ? '上下桥' : '';
+  draw();
+}
+const LABEL = {ok:'', cover:'顶班', gap:'待替班', open:'没排人', rest:'休', none:'无人'};
 const TABS = {tToday:'today', tGap:'gap', tLeave:'leave', tOperators:'operators'};
-let tab = 'today', past = false, dayAt = null;
+let tab = 'today', past = false, dayAt = null, kind = '';
 const match = (q, ...parts) => q.split(/\s+/).every(word => parts.join(' ').toLowerCase().includes(word));
 function switchTab(next){
   if(tab !== next) $('q').value = '';
   tab = next;
   dayAt = null;
+  kind = '';
   window.scrollTo(0, 0);
   draw();
 }
 function drawOperators(list, q){
-  const groups = new Map();
-  for(const person of data.operators || []){
-    const area = person.area || '区域待补';
-    const certs = person.certificates || [];
-    if(!match(q, person.name, person.note, area, ...certs)) continue;
-    if(!groups.has(area)) groups.set(area, []);
-    groups.get(area).push(person);
+  const found = (data.operators || []).filter(p => match(q, p.name, p.note, p.area, ...p.types, ...p.certificates));
+  const order = (a,b) => (!!b.phone - !!a.phone) || (b.types.length - a.types.length) || a.name.localeCompare(b.name);
+  const sure = found.filter(p => !kind || p.types.includes(kind)).sort(order);
+  const unsure = kind ? found.filter(p => !p.types.length).sort(order) : [];
+  const people = [...sure, ...unsure];
+  if(kind && !sure.length) list.append(el('p','empty', `没有登记能开${kind}的替班司机。`));
+  for(const p of people){
+    if(kind && p === unsure[0]) list.append(el('h2','', `下面 ${unsure.length} 人机型没登记，打电话确认`));
+    const box = el('article','person'), line = el('div','line');
+    line.append(el('h3','',p.name));
+    if(p.phone) line.append(callButton(p.phone));
+    box.append(line);
+    const tags = el('p');
+    if(p.types.length) for(const k of p.types){ tags.append(chip(k), ' '); } else tags.append(chip('机型待核'));
+    tags.append(` ${p.area || '区域未登记'}`);
+    box.append(tags);
+    const d = el('details'); d.append(el('summary','hint','详情'));
+    for(const x of [p.note, p.phone && '手机：' + pretty(p.phone), ...p.certificates].filter(Boolean)) d.append(el('div','detail',x));
+    box.append(d);
+    list.append(box);
   }
-  for(const [area, people] of groups){
-    const section = el('section', 'relief-group');
-    const title = el('h2','',area);
-    section.append(title);
-    for(const p of people){
-      const box = el('article','person');
-      box.append(el('h3','',p.name));
-      addNote(box, p.note, p.phone);
-      const cert = el('p','', '塔吊证件');
-      cert.append(el('strong','', p.certificates?.join('；') || '资料待补'));
-      box.append(cert);
-      section.append(box);
-    }
-    list.append(section);
-  }
-  if(!groups.size) list.append(el('p','empty', q ? '没有找到符合条件的司机。' : '暂无替班司机记录。'));
+  if(!people.length && !kind) list.append(el('p','empty', q || kind ? '没有找到符合条件的司机。' : '暂无替班司机记录。'));
 }
 function grouped(list, rows, make, headNote){
   let last = '';
@@ -198,6 +229,21 @@ function grouped(list, rows, make, headNote){
     if(r.date !== last){ last = r.date; const h = el('h2','',dayName(r.date)); if(headNote) h.append(el('span','',headNote(r.date))); list.append(h); }
     list.append(make(r));
   }
+}
+function slotRow(x){
+  const row = el('div','slot ' + x.state), tc = el('div','tc', `${x.tc}${x.shift ? ' '+x.shift : ''}`);
+  tc.append(chip(x.crane));
+  const nm = el('div','nm');
+  if(x.name) nm.append(details(x.name, x.phone, x.note));
+  else nm.textContent = x.state==='none' ? '—' : x.state==='open' ? '？' : '';
+  row.append(tc, nm);
+  if(LABEL[x.state]) row.append(el('span','st', LABEL[x.state]));
+  if(x.phone && (x.state==='ok' || x.state==='cover')) row.append(callButton(x.phone));
+  return row;
+}
+function openSlots(day){
+  const d = data.schedule.find(x => x.date === day);
+  return d ? d.sites.flatMap(s => s.slots.filter(x => x.state==='open').map(x => ({site:s.site, ...x}))) : [];
 }
 function drawToday(list, q){
   const days = data.schedule.filter(d => d.date >= sg());
@@ -217,12 +263,7 @@ function drawToday(list, q){
     const box = el('section','site'), h = el('h3','',s.site), n = slots.filter(x=>x.state==='gap').length;
     h.append(el('span','', s.rest ? '工地休' : n ? `待替班 ${n}` : ''));
     box.append(h);
-    for(const x of slots){
-      const row = el('div','slot ' + x.state), nm = el('div','nm', x.name || (x.state==='none' ? '—' : x.state==='open' ? '？' : ''));
-      addNote(nm, x.note, x.phone);
-      row.append(el('span','tc', `${x.tc}${x.shift ? ' '+x.shift : ''}`), nm, el('span','st', LABEL[x.state]));
-      box.append(row);
-    }
+    for(const x of slots) box.append(slotRow(x));
     list.append(box);
   }
   if(!shown) list.append(el('p','empty','没找到。'));
@@ -234,26 +275,44 @@ function draw(){
   const gapRows = future.filter(r => r.date <= tomorrow && !r.rep);
   const gaps = d => gapRows.filter(r => r.date===d).length;
   const word = n => n ? `缺 ${n} 人` : '不缺人';
-  $('sub').replaceChildren(el('span','updated', `更新于 ${data.updated}`));
+  const summary = (label, d) => {
+    const p = el('p','', label), open = openSlots(d).length;
+    p.append(el('b','', gaps(d) ? `待替班 ${gaps(d)}` : '休假都有人顶'), open ? `，没排人 ${open}` : '');
+    return p;
+  };
+  $('sub').replaceChildren(summary('今天：', today), summary('明天：', tomorrow), el('p','updated', `更新于 ${data.updated}`));
   $('nGap').textContent = gapRows.length;
   $('nGap').hidden = !gapRows.length;
   for(const [id,name] of Object.entries(TABS)) $(id).setAttribute('aria-pressed', tab===name);
   $('daybar').hidden = tab !== 'today'; $('when').hidden = tab !== 'leave';
-  $('operatorTitle').hidden = tab !== 'operators';
-  const prompt = tab === 'operators' ? '搜姓名、常用称呼、区域或证件' : '搜工地、塔吊或名字';
+  $('kind').hidden = tab !== 'operators';
+  for(const [id,value] of [['kAll',''],['kFlat','平桥'],['kLuff','上下桥']]) $(id).setAttribute('aria-pressed', kind===value);
+  const prompt = tab === 'operators' ? '搜姓名或区域' : '搜工地、塔吊或名字';
   $('q').placeholder = prompt + '…';
   $('q').setAttribute('aria-label', prompt);
   $('wNext').setAttribute('aria-pressed', !past); $('wPast').setAttribute('aria-pressed', past);
-  $('foot').hidden = tab !== 'operators';
-  $('foot').textContent = '派工前请核对证件类别及有效期。';
+  $('foot').hidden = false;
+  $('foot').textContent = tab === 'operators' ? '派工前请核对证件类别及有效期。' : '这是计划排班。机型带「推定」的，派工前先确认。';
   const list = $('list'); list.replaceChildren();
   if(tab === 'today'){ drawToday(list, q); return; }
   if(tab === 'operators'){ drawOperators(list, q); return; }
   const source = tab === 'gap' ? gapRows : past ? data.past.filter(r => r.date < today) : future;
-  const rows = source.filter(r => match(q, r.site, r.tc, r.who, r.rep, r.who_note, r.rep_note));
+  const rows = source.filter(r => match(q, r.site, r.tc, r.crane, r.who, r.rep));
   const old = tab === 'leave' && past;
   grouped(list, rows, r => card(r, old), tab === 'gap' ? d => word(gaps(d)) : null);
-  if(!rows.length) list.append(el('p','empty', q ? '没找到。' : tab==='gap' ? '今天和明天没有待替班的岗位。' : '没有记录。'));
+  if(!rows.length) list.append(el('p','empty', q ? '没找到。' : tab==='gap' ? '今天和明天的休假都有人顶。' : '没有记录。'));
+  if(tab === 'gap'){
+    for(const d of [today, tomorrow]){
+      const open = openSlots(d).filter(x => match(q, x.site, x.tc, x.crane));
+      if(!open.length) continue;
+      list.append(el('h2','', `${dayName(d)} 没排人 ${open.length}`));
+      for(const s of [...new Set(open.map(x => x.site))]){
+        const box = el('section','site'); box.append(el('h3','',s));
+        for(const x of open.filter(y => y.site===s)) box.append(slotRow(x));
+        list.append(box);
+      }
+    }
+  }
 }
 function key(){
   const m = location.hash.match(/k=([A-Za-z0-9_-]+)/);
@@ -267,6 +326,7 @@ async function load(){
   store.set(k); $('app').hidden = false; draw();
 }
 for(const [id,next] of Object.entries(TABS)) $(id).onclick = () => switchTab(next);
+for(const [id,value] of [['kAll',''],['kFlat','平桥'],['kLuff','上下桥']]) $(id).onclick = () => { kind = value; draw(); };
 $('wNext').onclick = () => { past = false; draw(); };
 $('wPast').onclick = () => { past = true; draw(); };
 $('q').oninput = () => draw();
