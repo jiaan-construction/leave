@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
-<title>JIA AN 司机调度</title>
+<link rel="icon" href="data:,">
+<title>JIA AN｜司机调度中心</title>
 <style>
 /* 沿用工地导航的 JIA AN 视觉规范：品牌红只用于动作与标识 */
 :root{--brand:#E9272C;--ground:#F6F7F9;--surface:#fff;--surface-2:#F1F3F6;--ink:#111;--ink-soft:#5E6367;--ink-faint:#8C9296;
@@ -15,7 +16,7 @@
 @media (prefers-color-scheme:dark){:root{--brand:#FF5054;--ground:#111214;--surface:#1A1C1F;--surface-2:#212429;--ink:#EDEEEF;--ink-soft:#A0A6AA;--ink-faint:#767C81;--rule:#2A2E33;--rule-soft:#22262A;--settled:#C3CACE;--settled-bg:#262A2E;--pending:#E0953F;--pending-bg:#2E2415}}
 *{box-sizing:border-box}[hidden]{display:none!important}
 body{margin:0;background:var(--ground);color:var(--ink);font:17px/1.47 var(--sans);-webkit-font-smoothing:antialiased}
-.wrap{max-width:760px;margin:0 auto;padding:0 16px calc(60px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px calc(105px + env(safe-area-inset-bottom,0px))}
 .masthead{display:flex;align-items:center;gap:14px;padding:14px 0 6px}
 .masthead img{width:48px;height:48px;flex:none}
 .eyebrow{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--brand);margin:0 0 4px}
@@ -43,7 +44,11 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .gate{margin-top:20px;display:flex;flex-direction:column;gap:10px}
 .btn{min-height:52px;border:0;border-radius:12px;background:var(--brand);color:#fff;font:600 17px var(--sans);cursor:pointer}
 .msg{color:var(--brand);min-height:1.4em;margin:0}
-.tabs{display:flex;gap:3px;padding:3px;background:var(--surface-2);border:1px solid var(--rule);border-radius:11px}
+.tabs{position:fixed;z-index:10;bottom:0;left:0;right:0;border-top:1px solid var(--rule);background:var(--surface);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tab-inner{max-width:760px;margin:auto;padding:4px 8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.tabs .chip{font-size:clamp(12px,3.6vw,15px);padding:5px 2px 6px;min-height:56px}
+.tabs .chip[aria-pressed=true]{box-shadow:none;color:var(--brand);background:var(--surface-2)}
+.tab-icon{display:block;font-size:19px;line-height:1.2}
 .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:10px;background:var(--brand);color:#fff;font-size:12px;line-height:20px}
 .daybar{display:flex;align-items:center;gap:8px}
 .daybar button{width:52px;height:44px;border:1px solid var(--rule);border-radius:11px;background:var(--surface);color:var(--ink);font:600 20px var(--sans);cursor:pointer}
@@ -62,29 +67,66 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .slot.open .st,.slot.cover .st{color:var(--pending);font-weight:600}
 .slot.rest .nm,.slot.none .nm{color:var(--ink-faint)}
 .empty,.foot{color:var(--ink-faint);font-size:14px;text-align:center;margin-top:24px}
-.toast{position:fixed;left:16px;right:16px;bottom:16px;background:var(--ink);color:var(--ground);border-radius:12px;padding:12px 14px;font-size:15px;text-align:center}
+.toast{position:fixed;z-index:20;left:16px;right:16px;bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--ground);border-radius:12px;padding:12px 14px;font-size:15px;text-align:center}
+.page-head,.person-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.page-head h2{border:0;margin:0;padding:0;font-size:19px}
+.action{display:inline-flex;align-items:center;min-height:44px;padding:4px 10px;border:1px solid var(--rule);border-radius:9px;background:var(--surface);color:var(--brand);font:600 14px var(--sans);text-decoration:none;cursor:pointer}
+.person{padding:14px;margin-top:10px;border:1px solid var(--rule);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
+.person h3{margin:0;font-size:18px;overflow-wrap:anywhere}
+.person p,.hint{margin:6px 0;font-size:14px;color:var(--ink-soft)}
+.person .tag{margin:0;flex:none}
+.person .unknown{color:var(--settled);background:var(--settled-bg)}
+.actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.cover-context{padding:8px 10px;background:var(--pending-bg);color:var(--pending);border-radius:9px;font-size:14px}
+.cover-context .action{margin-left:6px}
+#availability .chip{font-size:clamp(11px,3.3vw,14px);padding:0 2px}
+dialog{background:var(--surface);color:var(--ink);border:1px solid var(--rule);border-radius:14px;padding:18px;width:min(420px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:auto}
+dialog::backdrop{background:rgba(0,0,0,.48)}
+dialog h2{margin:0 0 10px}
+dialog p{font-size:15px}
+dialog form{margin-top:12px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="masthead"><img src="data:image/png;base64,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" alt="JIA AN" width="48" height="48">
-    <div><p class="eyebrow">JIA AN Construction</p><h1>司机调度</h1></div></header>
+    <div><p class="eyebrow">JIA AN Construction</p><h1>司机调度中心</h1><p class="hint" lang="en">Crane Operator Scheduling</p></div></header>
   <p class="sub" id="sub">正在打开…</p>
   <main id="app" hidden>
     <div class="controls">
-      <div class="tabs" role="group" aria-label="页面">
-        <button class="chip" id="tToday" type="button">今日排班</button>
-        <button class="chip" id="tGap" type="button">待替班<span class="badge" id="nGap"></span></button>
-        <button class="chip" id="tLeave" type="button">休假记录</button>
+      <div id="operatorTools" hidden>
+        <div class="page-head"><h2>替班人员库</h2><a id="workerTable" class="action" target="_blank" rel="noopener noreferrer">＋ 新增人员</a></div>
+        <p class="hint" id="historyNote"></p>
+        <div id="coverContext" class="cover-context" hidden></div>
+        <div class="filters" id="availability" role="group" aria-label="可用状态">
+          <button class="chip" type="button" data-status="all">全部</button>
+          <button class="chip" type="button" data-status="reachable">可联系</button>
+          <button class="chip" type="button" data-status="booked">已预约</button>
+          <button class="chip" type="button" data-status="unavailable">暂不可用</button>
+          <button class="chip" type="button" data-status="unknown">待确认</button>
+        </div>
       </div>
       <div class="daybar" id="daybar"><button type="button" id="prev" aria-label="前一天">‹</button><strong id="day"></strong><button type="button" id="next" aria-label="后一天">›</button></div>
       <div class="filters" id="when" role="group" aria-label="时间"><button class="chip" id="wNext" type="button">即将</button><button class="chip" id="wPast" type="button">本月已过</button></div>
       <input type="search" id="q" placeholder="搜工地、塔吊或名字…" aria-label="搜工地、塔吊或名字" autocomplete="off">
     </div>
     <div id="list"></div>
-    <p class="foot">这是计划排班，不是出勤记录。<br>找到顶班人，点「报顶班」发到群里。</p>
+    <p class="foot" id="foot"></p>
+    <nav class="tabs" aria-label="调度页面"><div class="tab-inner">
+      <button class="chip" id="tToday" type="button" title="Today’s Schedule"><span class="tab-icon" aria-hidden="true">📅</span>今日排班</button>
+      <button class="chip" id="tGap" type="button" title="Pending Coverage"><span class="tab-icon" aria-hidden="true">🔄</span>待替班<span class="badge" id="nGap" hidden></span></button>
+      <button class="chip" id="tLeave" type="button" title="Leave Records"><span class="tab-icon" aria-hidden="true">🗓️</span>休假记录</button>
+      <button class="chip" id="tOperators" type="button" title="Relief Operators"><span class="tab-icon" aria-hidden="true">👥</span>替班人员库</button>
+    </div></nav>
   </main>
 </div>
+<dialog id="confirmCover" aria-labelledby="confirmTitle">
+  <h2 id="confirmTitle">确认替班安排</h2>
+  <p id="confirmDescription"></p>
+  <p>请先核实司机本人同意、该岗位工作资格及排班冲突，再登记。</p>
+  <div class="actions" id="confirmActions"></div>
+  <form method="dialog"><button class="action" type="submit">返回</button></form>
+</dialog>
 <div class="toast" id="toast" hidden></div>
 <script>
 (function(){
@@ -112,10 +154,35 @@ function dayName(iso){
 }
 let toastTimer;
 function toast(t){$('toast').textContent=t; $('toast').hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('toast').hidden=true, 3500);}
-async function report(r){
-  const text = `【顶班】${dayName(r.date).replace(/^(今天|明天) /,'')} ${r.site} ${r.tc}（${r.who} 休）\n顶班人：\n电话：`;
+async function report(r, person){
+  const text = `【顶班】${dayName(r.date).replace(/^(今天|明天) /,'')} ${r.site} ${r.tc}（${r.who} 休）\n顶班人：${person?.name || ''}`;
   try{ if(navigator.share){ await navigator.share({text}); return; } }catch(e){ if(e.name==='AbortError') return; }
-  try{ await navigator.clipboard.writeText(text); toast('已复制，到群里粘贴并填上名字电话'); }catch(e){ prompt('复制下面这段发到群里', text); }
+  try{ await navigator.clipboard.writeText(text); toast(person ? '已复制，可在调度群提交' : '已复制，填好名字后可在调度群提交'); }catch(e){ prompt('复制下面这段发到群里', text); }
+}
+function airLink(label, path){
+  const a = el('a','action',label);
+  a.href = airtableURL(path); a.target = '_blank'; a.rel = 'noopener noreferrer';
+  return a;
+}
+function airtableURL(path){ return new URL(path, 'https://airtable.com/').href; }
+function action(label, run){
+  const b = el('button','action',label); b.type = 'button'; b.onclick = run; return b;
+}
+function confirm(r, person){
+  $('confirmDescription').textContent = [dayName(r.date), r.site, r.tc, person?.name || ''].filter(Boolean).join(' · ');
+  const actions = $('confirmActions');
+  actions.replaceChildren();
+  if(person) actions.append(airLink('联系人与资质', `${data.worker_table}/${person.record}`),
+    action('复制司机姓名', async () => {
+      try{ await navigator.clipboard.writeText(person.name); toast('司机姓名已复制'); }
+      catch(e){ prompt('复制司机姓名', person.name); }
+    }));
+  if(data.cover_interface){
+    actions.append(airLink(r.cover?.reported ? '查看 Airtable 登记' : '打开 Airtable 界面', data.cover_interface));
+    if(r.cover) actions.append(airLink('打开对应记录', `${data.cover_table}/${r.cover.record}`));
+  }
+  if(!r.cover?.reported) actions.append(action('分享顶班信息', () => { $('confirmCover').close(); report(r, person); }));
+  $('confirmCover').showModal();
 }
 function card(r, past){
   const c = el('div', 'card' + (r.rep || past ? '' : ' gap')), b = el('div','body');
@@ -125,13 +192,61 @@ function card(r, past){
   b.append(who, el('div','state', r.rep ? `${r.rep} 顶班` : past ? '没记顶班' : '待替班'));
   c.append(b);
   if(past) return c;
-  if(!r.rep){ const a = el('button','act','报顶班'); a.type='button'; a.onclick=()=>report(r); c.append(a); }
-  else if(r.tel){ const a = el('a','act','打电话'); a.href='tel:'+r.tel.replace(/[^\d+]/g,''); c.append(a); }
+  if(!r.rep){
+    if(r.cover?.reported) b.append(el('p','hint','Airtable 已登记，待排班回写'));
+    const actions = el('div','actions');
+    if(!r.cover?.reported) actions.append(action('寻找替班人员', () => {
+      selectedCover = r; status = 'all'; switchTab('operators');
+    }));
+    actions.append(action(r.cover?.reported ? '查看登记' : '报顶班', () => confirm(r)));
+    b.append(actions);
+  }
   return c;
 }
 const LABEL = {ok:'计划', cover:'顶班', gap:'待替班', open:'待安排', rest:'休', none:'无人'};
-let tab = 'today', past = false, dayAt = null;
-const match = (q, ...parts) => !q || parts.join(' ').toLowerCase().includes(q);
+const TABS = {tToday:'today', tGap:'gap', tLeave:'leave', tOperators:'operators'};
+const AVAILABILITY = {unknown:'待确认', reachable:'可联系', booked:'已预约', unavailable:'暂不可用'};
+let tab = 'today', past = false, dayAt = null, status = 'all', selectedCover = null;
+const match = (q, ...parts) => q.split(/\s+/).every(word => parts.join(' ').toLowerCase().includes(word));
+function switchTab(next){
+  if(tab !== next) $('q').value = '';
+  tab = next;
+  dayAt = null;
+  window.scrollTo(0, 0);
+  draw();
+}
+function drawOperators(list, q){
+  $('workerTable').hidden = !data.worker_table;
+  if(data.worker_table) $('workerTable').href = airtableURL(data.worker_table);
+  const context = $('coverContext');
+  context.hidden = !selectedCover;
+  if(selectedCover){
+    context.replaceChildren(`${dayName(selectedCover.date)} · ${selectedCover.site} ${selectedCover.tc}`,
+      action('清除岗位', () => { selectedCover = null; draw(); }));
+  }
+  $('historyNote').textContent = data.history_from
+    ? `历史从 ${data.history_from} 起，依据已过日期的排班。人员可用性由现场另行核实。` : '';
+  if(!Array.isArray(data.operators)){
+    list.append(el('p','empty','人员主档暂不可读，请稍后重试或到 Airtable 查看。'));
+    return;
+  }
+  const rows = data.operators.filter(p => (status === 'all' || p.status === status)
+    && match(q, p.name, ...p.aliases, ...p.sites));
+  for(const p of rows){
+    const box = el('article','person'), head = el('div','person-head');
+    head.append(el('h3','',p.name), el('span','tag '+p.status,AVAILABILITY[p.status] ?? AVAILABILITY.unknown));
+    box.append(head);
+    if(p.aliases.length) box.append(el('p','',`常用称呼 · ${p.aliases.join('、')}`));
+    box.append(el('p','',`历史排班工地 · ${p.sites.join('、') || '暂无记录'}`),
+      el('p','',p.cover_count ? `历史安排替班 ${p.cover_count} 次 · 最近 ${dayName(p.last_cover)}` : '累计范围内暂无替班安排记录'));
+    const actions = el('div','actions');
+    actions.append(airLink('联系资料与详情', `${data.worker_table}/${p.record}`));
+    if(selectedCover) actions.append(action('登记这位司机', () => confirm(selectedCover, p)));
+    box.append(actions);
+    list.append(box);
+  }
+  if(!rows.length) list.append(el('p','empty',q || status !== 'all' ? '没有符合条件的人员。' : '目前主档没有可列出的替班人员。'));
+}
 function grouped(list, rows, make, headNote){
   let last = '';
   for(const r of rows){
@@ -174,11 +289,21 @@ function draw(){
   const word = n => n ? `缺 ${n} 人` : '不缺人';
   $('sub').replaceChildren('今天 ', el('b','',word(gaps(today))), '，明天 ', el('b','',word(gaps(plus(today,1)))), `。更新于 ${data.updated}。`);
   $('nGap').textContent = gapRows.length;
-  for(const [id,name] of [['tToday','today'],['tGap','gap'],['tLeave','leave']]) $(id).setAttribute('aria-pressed', tab===name);
+  $('nGap').hidden = !gapRows.length;
+  for(const [id,name] of Object.entries(TABS)) $(id).setAttribute('aria-pressed', tab===name);
   $('daybar').hidden = tab !== 'today'; $('when').hidden = tab !== 'leave';
+  $('operatorTools').hidden = tab !== 'operators';
+  const prompt = tab === 'operators' ? '搜姓名、常用称呼或历史工地' : '搜工地、塔吊或名字';
+  $('q').placeholder = prompt + '…';
+  $('q').setAttribute('aria-label', prompt);
+  for(const button of $('availability').querySelectorAll('button')) button.setAttribute('aria-pressed', button.dataset.status === status);
   $('wNext').setAttribute('aria-pressed', !past); $('wPast').setAttribute('aria-pressed', past);
+  $('foot').textContent = tab === 'operators'
+    ? '联系资料与资格详情由 Airtable 权限控制。可用性、派工资格和到岗需分别确认。'
+    : '页面显示排班安排。实际出勤以现场记录为准。';
   const list = $('list'); list.replaceChildren();
   if(tab === 'today'){ drawToday(list, q); return; }
+  if(tab === 'operators'){ drawOperators(list, q); return; }
   const source = tab === 'gap' ? gapRows : past ? data.past.filter(r => r.date < today) : future;
   const rows = source.filter(r => match(q, r.site, r.tc, r.who, r.rep));
   const old = tab === 'leave' && past;
@@ -196,9 +321,13 @@ async function load(){
   catch(e){ $('app').hidden = true; $('sub').textContent = e.name==='OperationError' ? '这个链接已经失效，请要一个新链接。' : '打不开，请检查网络后再试。'; return; }
   store.set(k); $('app').hidden = false; draw();
 }
-$('tToday').onclick = () => { tab = 'today'; dayAt = null; draw(); };
-$('tGap').onclick = () => { tab = 'gap'; draw(); };
-$('tLeave').onclick = () => { tab = 'leave'; draw(); };
+for(const [id,next] of Object.entries(TABS)) $(id).onclick = () => {
+  if(next === 'operators') selectedCover = null;
+  switchTab(next);
+};
+for(const button of $('availability').querySelectorAll('button')) button.onclick = () => {
+  status = button.dataset.status; draw();
+};
 $('wNext').onclick = () => { past = false; draw(); };
 $('wPast').onclick = () => { past = true; draw(); };
 $('q').oninput = () => draw();
