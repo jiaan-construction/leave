@@ -456,7 +456,12 @@ function composeMessage(facts, scene, lang) {
 /* 版本是否弹出只看发布记录和本机已读版本号。判断不读页面，以后别的内部页可以整段抄走。 */
 /* RELEASES_START */
 function seenVersion(value){
-  return typeof value === 'string' && /^\d{4}\.\d{2}\.\d{2}$/.test(value) ? value : '';
+  return typeof value === 'string' && /^\d{4}\.\d{2}\.\d{2}(?:\.[1-9]\d*)?$/.test(value) ? value : '';
+}
+function compareVersions(a, b){
+  const [ay, am, ad, an = 0] = a.split('.').map(Number);
+  const [by, bm, bd, bn = 0] = b.split('.').map(Number);
+  return ay - by || am - bm || ad - bd || an - bn;
 }
 function releaseLines(entry, language, field){
   const block = entry && entry[field];
@@ -466,18 +471,17 @@ function releaseLines(entry, language, field){
 }
 function releaseNotice(record, seen){
   const history = (record && Array.isArray(record.entries) ? record.entries : [])
-    .filter(entry => entry && (!entry.status || entry.status === 'released') && seenVersion(entry.version) && /^\d{4}-\d{2}-\d{2}$/.test(entry.date || ''))
-    .slice()
-    .sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : a.version < b.version ? 1 : a.version > b.version ? -1 : 0);
+    .filter(entry => entry && (!entry.status || entry.status === 'released') &&
+      seenVersion(entry.version) && /^\d{4}-\d{2}-\d{2}$/.test(entry.date || ''))
+    .sort((a, b) => compareVersions(b.version, a.version));
   const current = history[0] || null;
   const read = seenVersion(seen);
-  let popup = null;
-  if(current && !read) popup = 'intro';
-  else if(current && read !== current.version && current.notice === 'major') popup = 'update';
-  return {popup, current, history, seen: read};
+  const unread = read ? history.filter(entry => entry.notice === 'major' && compareVersions(entry.version, read) > 0) : [];
+  const popup = current && !read ? 'intro' : unread.length ? 'update' : null;
+  return {popup, current, history, seen: read, unread};
 }
 /* RELEASES_END */
-const RELEASE_RECORD = {"page":"leave","entries":[{"version":"2026.11.28","date":"2026-11-28","notice":"major","kind":"feature","added":{"zh":["第四页改为司机名册","已核实的国籍显示在姓名右边，点国旗可以看到国家名称","排班和休假的消息按当天的情况生成，默认是英文"],"en":["The fourth page is now Operator Directory","A checked nationality shows beside the name. Tap the flag to read the country","Schedule and leave messages follow the day. English is the default"]},"improved":{"zh":["排班行以常用称呼和头像为主，证件姓名放在下面","没有照片时显示姓名首字母","国籍没核实的，不显示国旗"],"en":["A shift row leads with the everyday name and initials. The document name sits underneath","A person without a photo gets initials","No flag appears unless the nationality is checked"]},"fixes":{"zh":[],"en":[]},"highlights":{"zh":["今日排班、待替班、休假记录、司机名册","待替班可以找人，或复制英文消息","国籍只用来认出是谁，不改变排班顺序","有已核号码时可以打电话或发 WhatsApp"],"en":["Schedule, coverage, leave, and the operator directory","Coverage can find a driver, or copy an English message","Nationality is only for recognition. It does not change who is assigned","A checked number can call or open WhatsApp"]}},{"version":"2026.11.27","date":"2026-11-27","notice":"major","kind":"feature","added":{"zh":["司机分成 S Pass、本地司机、替班司机","工地有确认坐标时，点工地名或导航，打开苹果地图驾车路线"],"en":["Drivers are grouped into S Pass, local, and relief","A confirmed site location opens Apple Maps driving directions"]},"improved":{"zh":["没有确认坐标的工地不再打开错误地点"],"en":["A site without a confirmed location no longer opens the wrong place"]},"fixes":{"zh":[],"en":[]},"highlights":{"zh":["今日排班、待替班、休假记录、司机信息库","待替班可以找人，或复制英文邀班","休假可以按日历看即将到来和本月已过的日期","有已核号码时可以打电话或发 WhatsApp"],"en":["Schedule, coverage, leave, and drivers","Coverage can find a driver, or copy an English request","Leave can be checked on a calendar for coming dates and earlier this month","A checked number can call or open WhatsApp"]}}]};
+const RELEASE_RECORD = {"page":"leave","entries":[{"version":"2026.11.28.4","date":"2026-11-28","notice":"major","kind":"feature","added":{"zh":["同一天的发布有独立版本号。"],"en":["Each release has a distinct version, including same-day updates."]},"improved":{"zh":["首次打开显示页面功能。之后会提醒仍未读的重要更新。"],"en":["The first visit introduces the page. Later visits show missed important updates."]},"fixes":{"zh":["小修复会保留在历史中，重要更新仍可收到提醒。"],"en":["Routine fixes stay in history and no longer suppress important updates."]},"removed":{"zh":[],"en":[]},"highlights":{"zh":["查看今日排班、待替班、休假和司机名册。","逐条选择通知语言，再复制或打开 WhatsApp 草稿。"],"en":["See the schedule, coverage, leave and drivers.","Choose the language for each draft before copying or opening WhatsApp."]}},{"version":"2026.11.28.2","date":"2026-11-28","notice":"fix","kind":"feature","added":{"zh":[],"en":[]},"improved":{"zh":["调度操作、导航与公告统一为中文。"],"en":["The dispatch interface and notices use Chinese."]},"fixes":{"zh":["通知按收件人提供默认语言，复制与 WhatsApp 草稿一致。"],"en":["Message language follows the recipient. Copy and WhatsApp agree."]},"removed":{"zh":[],"en":[]},"highlights":{"zh":["查看排班、待替班、休假和司机名册；每条通知可单独换语言。"],"en":["View schedules, coverage, leave and drivers. Each draft can use either language."]}},{"version":"2026.11.28","date":"2026-11-28","notice":"major","kind":"feature","added":{"zh":["第四页改为司机名册","已核实的国籍显示在姓名右边，点国旗可以看到国家名称","排班和休假的消息按当天的情况生成，默认是英文"],"en":["The fourth page is now Operator Directory","A checked nationality shows beside the name. Tap the flag to read the country","Schedule and leave messages follow the day. English is the default"]},"improved":{"zh":["排班行以常用称呼和头像为主，证件姓名放在下面","没有照片时显示姓名首字母","国籍没核实的，不显示国旗"],"en":["A shift row leads with the everyday name and initials. The document name sits underneath","A person without a photo gets initials","No flag appears unless the nationality is checked"]},"fixes":{"zh":[],"en":[]},"removed":{"zh":[],"en":[]},"highlights":{"zh":["今日排班、待替班、休假记录、司机名册","待替班可以找人，或复制英文消息","国籍只用来认出是谁，不改变排班顺序","有已核号码时可以打电话或发 WhatsApp"],"en":["Schedule, coverage, leave, and the operator directory","Coverage can find a driver, or copy an English message","Nationality is only for recognition. It does not change who is assigned","A checked number can call or open WhatsApp"]}},{"version":"2026.11.27","date":"2026-11-27","notice":"major","kind":"feature","added":{"zh":["司机分成 S Pass、本地司机、替班司机","工地有确认坐标时，点工地名或导航，打开苹果地图驾车路线"],"en":["Drivers are grouped into S Pass, local, and relief","A confirmed site location opens Apple Maps driving directions"]},"improved":{"zh":["没有确认坐标的工地不再打开错误地点"],"en":["A site without a confirmed location no longer opens the wrong place"]},"fixes":{"zh":[],"en":[]},"removed":{"zh":[],"en":[]},"highlights":{"zh":["今日排班、待替班、休假记录、司机信息库","待替班可以找人，或复制英文邀班","休假可以按日历看即将到来和本月已过的日期","有已核号码时可以打电话或发 WhatsApp"],"en":["Schedule, coverage, leave, and drivers","Coverage can find a driver, or copy an English request","Leave can be checked on a calendar for coming dates and earlier this month","A checked number can call or open WhatsApp"]}}]};
 const SCENE_LABEL = {arrival:'到岗', upcoming:'上岗安排', 'relief-set':'替班已定', 'relief-ask':'找替班', 'leave-before':'休假前', 'leave-during':'休假中', 'leave-sick':'病假', 'leave-return':'返岗', 'site-notice':'现场通知'};
 async function copyText(text){
   try{ await navigator.clipboard.writeText(text); toast('已复制'); }
@@ -646,7 +650,7 @@ function findRelief(row){
 const LABEL = {ok:'', cover:'顶班', gap:'待替班', open:'没排人', rest:'休', none:'无人'};
 const TABS = {tToday:'today', tGap:'gap', tLeave:'leave', tOperators:'operators'};
 let ask = null, releaseMode = null, releaseArmed = false;
-const RELEASE_LABEL = {eyebrow:'更新说明', history:'更新记录', intro:'现在可以用', added:'新增', improved:'优化', fixes:'修复', notice:'公告', close:'知道了', version:'版本 '};
+const RELEASE_LABEL = {eyebrow:'更新说明', history:'更新记录', intro:'现在可以用', added:'新增', improved:'优化', fixes:'修复', removed:'移除', notice:'公告', close:'知道了', version:'版本 '};
 function readSeen(){
   try { return seenVersion(localStorage.getItem('jiaan-leave-seen')); }
   catch (e) { return ''; }
@@ -670,27 +674,26 @@ function renderRelease(){
   if(!releaseMode || !view.current){ box.hidden = true; return; }
   box.hidden = false;
   const historyMode = releaseMode === 'history';
+  const updateMode = releaseMode === 'update';
+  const entries = historyMode ? view.history : updateMode ? view.unread : [view.current];
+  const shown = entries[0] || view.current;
+  const showEach = historyMode || entries.length > 1;
   $('releaseEyebrow').textContent = historyMode ? label.history : label.eyebrow;
-  $('releaseTitle').textContent = view.current.version;
-  $('releaseDate').textContent = view.current.date;
+  $('releaseTitle').textContent = shown.version;
+  $('releaseDate').textContent = shown.date;
   $('releaseClose').textContent = label.close;
   const body = $('releaseBody');
   body.replaceChildren();
-  addReleaseGroup(body, label.intro, releaseLines(view.current, 'zh', 'highlights'));
-  const entries = historyMode ? view.history : [view.current];
+  if(!updateMode) addReleaseGroup(body, label.intro, releaseLines(view.current, 'zh', 'highlights'));
   for(const entry of entries){
-    const block = historyMode ? el('section', 'release-entry') : body;
-    if(historyMode){
-      block.append(el('h3', '', entry.version));
-      block.append(el('p', 'release-date', entry.date));
-      if(entry.kind === 'notice') block.append(el('p', 'release-kicker', label.notice));
-    } else if(view.current.kind === 'notice') {
-      body.append(el('p', 'release-kicker', label.notice));
-    }
+    const block = showEach ? el('section', 'release-entry') : body;
+    if(showEach) block.append(el('h3', '', entry.version), el('p', 'release-date', entry.date));
+    if(entry.kind === 'notice') block.append(el('p', 'release-kicker', label.notice));
     addReleaseGroup(block, label.added, releaseLines(entry, 'zh', 'added'));
     addReleaseGroup(block, label.improved, releaseLines(entry, 'zh', 'improved'));
-    if(historyMode) addReleaseGroup(block, label.fixes, releaseLines(entry, 'zh', 'fixes'));
-    if(historyMode) body.append(block);
+    if(historyMode || updateMode) addReleaseGroup(block, label.fixes, releaseLines(entry, 'zh', 'fixes'));
+    addReleaseGroup(block, label.removed, releaseLines(entry, 'zh', 'removed'));
+    if(showEach) body.append(block);
   }
 }
 function openRelease(mode){
