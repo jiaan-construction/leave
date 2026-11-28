@@ -46,7 +46,7 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .msg{color:var(--brand);min-height:1.4em;margin:0}
 .tabs{position:fixed;z-index:10;bottom:0;left:0;right:0;border-top:1px solid var(--rule);background:var(--surface);padding-bottom:env(safe-area-inset-bottom,0px)}
 .tab-inner{max-width:760px;margin:auto;padding:4px 8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
-.tabs .chip{position:relative;font-size:13px;padding:5px 2px 6px;min-height:56px}
+.tabs .chip{position:relative;font-size:13px;padding:5px 2px 6px;min-height:64px}
 .tabs .chip[aria-pressed=true]{box-shadow:none;color:var(--brand);background:var(--surface-2)}
 .tab-en{display:block;font-size:10px;font-weight:500;line-height:1.2;margin-bottom:4px}
 .badge{display:inline-block;min-width:15px;padding:0 3px;margin-left:3px;border-radius:8px;background:var(--brand);color:#fff;font-size:10px;line-height:15px;vertical-align:1px}
@@ -58,9 +58,9 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .site{background:var(--surface);border:1px solid var(--rule);border-radius:14px;box-shadow:var(--shadow);margin-top:10px;overflow:hidden}
 .site h3{margin:0;padding:10px 14px;font-size:17px;display:flex;justify-content:space-between;gap:8px;background:var(--surface-2)}
 .site h3 span{font-size:13px;font-weight:400;color:var(--ink-faint)}
-.slot{display:flex;align-items:baseline;gap:10px;padding:9px 14px;border-top:1px solid var(--rule-soft)}
+.slot{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px 10px;padding:9px 14px;border-top:1px solid var(--rule-soft)}
 .tc{flex:none;width:76px;font-weight:600;font-size:15px}
-.nm{flex:1;min-width:0;overflow-wrap:anywhere}
+.nm{flex:1 1 150px;min-width:0;overflow-wrap:break-word}
 .visible-note{margin:4px 0 0;color:var(--ink-soft);font-size:14px;line-height:1.35;overflow-wrap:anywhere}.visible-note:before{content:"备注";font-size:11px;font-weight:600;margin-right:6px;color:var(--pending)}
 .st{flex:none;font-size:13px;color:var(--ink-faint)}
 .slot.gap{background:color-mix(in srgb,var(--brand) 9%,transparent)}
@@ -71,7 +71,23 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .toast{position:fixed;z-index:20;left:16px;right:16px;bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--ground);border-radius:12px;padding:12px 14px;font-size:15px;text-align:center}
 .action{display:inline-flex;align-items:center;min-height:44px;padding:4px 10px;border:1px solid var(--rule);border-radius:9px;background:var(--surface);color:var(--brand);font:600 14px var(--sans);text-decoration:none;cursor:pointer}
 .person{padding:14px;margin-top:10px;border:1px solid var(--rule);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
-.person p strong{display:block;color:var(--ink);font-weight:600}.relief-group>h2{margin:20px 0 8px}#operatorTitle{margin:0;padding:0;border:0}.person h3{margin:0;font-size:18px;overflow-wrap:anywhere}
+.person p strong{display:block;color:var(--ink);font-weight:600}.relief-group>h2{margin:20px 0 8px}#operatorTitle{margin:0;padding:0;border:0}.person h3{margin:0;font-size:18px;overflow-wrap:break-word}
+.identity{display:flex;gap:10px;align-items:center;min-width:0}
+.identity-main{flex:1;min-width:0}
+.name-row{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.display-name{margin:0;min-width:0;font-size:18px;font-weight:700;line-height:1.25;overflow-wrap:break-word}
+.identity.compact .display-name{font-size:16px}
+.legal{margin:1px 0 0;font-size:12px;line-height:1.3;color:var(--ink-faint);overflow-wrap:break-word}
+.avatar{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--surface-2);border:1px solid var(--rule);font-weight:700;font-size:16px}
+.avatar.sm{width:36px;height:36px;font-size:13px}
+.flag{flex:none;min-width:44px;min-height:44px;padding:0 6px;border:0;border-radius:10px;background:transparent;font:600 22px/1 var(--sans);cursor:pointer}
+.flag[aria-pressed=true]{font-size:13px;color:var(--ink)}
+button.avatar,button.identity-jump{border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:0}
+button.avatar{font-weight:700;background:var(--surface-2)}
+button.identity-jump{font-weight:700}
+.type-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.directory-find{display:flex;align-items:center;gap:8px;font-size:14px}
+.directory-find input{flex:1;min-width:0}
 .person p,.hint{margin:6px 0;font-size:14px;color:var(--ink-soft)}
 .actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
 .chiptype{display:inline-block;font-size:12px;font-weight:600;line-height:18px;padding:0 6px;border-radius:5px;background:var(--surface-2);border:1px solid var(--rule);color:var(--ink);white-space:nowrap}
@@ -104,7 +120,8 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .date-choice input{max-width:100%;min-width:0;min-height:44px;padding:4px 6px;border:1px solid var(--rule);border-radius:9px;background:var(--surface);color:var(--ink);font:inherit}
 .coverage-slot .action,.coverage-card .action{white-space:nowrap}
 .coverage-card .who{font-weight:600;font-size:16px}
-.leave-person .line{margin:0;align-items:start}
+.leave-person>.line{margin:0;flex-direction:column;align-items:stretch}
+.leave-person>.line .actions{margin-top:8px}
 .leave-dates small{display:block;color:var(--ink-soft);font-size:13px}
 .leave-calendar{margin:10px 0 14px;padding:10px;border:1px solid var(--rule);border-radius:14px;background:var(--surface)}
 .calendar-head{display:grid;grid-template-columns:auto 1fr auto auto;gap:6px;align-items:center;margin-bottom:6px}
@@ -132,6 +149,24 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .leave-item{border-top:1px solid var(--rule-soft);margin-top:9px;padding-top:8px}
 .leave-item p{margin:3px 0;font-size:14px}
 .leave-item .tag{margin-left:5px}
+.scene-choice{min-height:40px;max-width:8.6em;padding:0 4px;border:1px solid var(--rule);border-radius:9px;background:var(--surface);color:var(--ink);font:600 12px var(--sans)}
+.ask-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0;padding:8px 10px;border:1px solid var(--rule);border-radius:12px;background:var(--surface)}
+.release{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(17,17,17,.5)}
+.release-card{width:min(420px,100%);max-height:min(78vh,560px);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);color:var(--ink);border-radius:16px;padding:16px 16px 12px;box-shadow:0 12px 36px rgba(17,17,17,.28)}
+#releaseBody{overflow:auto;min-height:0}
+.release-logo{width:36px;height:36px;display:block;margin:0 auto 8px}
+.release-card .eyebrow{text-align:center;margin-top:0}
+.release-card h2{display:block;margin:2px 0 0;padding:0;border:0;font-size:22px;text-align:center}
+.release-date{margin:2px 0 0;text-align:center;color:var(--ink-soft);font-size:13px}
+.release-kicker{margin:12px 0 0;font-size:12px;font-weight:700;color:var(--ink-soft)}
+.release-card ul{margin:4px 0 0;padding-left:1.15em}
+.release-card li{margin:3px 0;font-size:14px;line-height:1.35}
+.release-entry{margin-top:12px;padding-top:10px;border-top:1px solid var(--rule-soft)}
+.release-entry h3{margin:0;font-size:16px}
+.release-lang{margin-top:12px}
+.release-go{flex:none;width:100%;margin-top:12px;min-height:48px;border:0;border-radius:12px;background:var(--brand);color:#fff;font:600 16px var(--sans);cursor:pointer}
+.foot{display:flex;flex-direction:column;align-items:center;gap:2px}
+.ver{min-height:44px;padding:6px 10px;border:0;background:transparent;color:var(--ink-soft);font:600 13px var(--sans);text-decoration:underline;cursor:pointer}
 </style>
 </head>
 <body>
@@ -141,10 +176,12 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
   <p class="sub" id="sub">正在打开…</p>
   <main id="app" hidden>
     <div class="controls">
+      <div class="filters" id="langSwitch" role="group" aria-label="消息语言"><button class="chip" id="langEn" type="button">EN</button><button class="chip" id="langZh" type="button">中文</button></div>
       <div id="coverageJump" class="coverage-jump" hidden>
         <button id="jumpToday" class="action" type="button">今天</button><button id="jumpTomorrow" class="action" type="button">明天</button>
         <label class="date-choice">日历 <input id="coverageDate" type="date"></label>
       </div>
+      <label class="date-choice directory-find" id="directoryFindWrap" hidden>找人 <input id="directoryFind" type="search" enterkeyhint="search" autocomplete="off" placeholder="姓名或别名"></label>
       <div class="directory-jump" id="directoryJump" role="group" aria-label="司机分类" hidden>
         <button class="action" type="button" data-driver-group="spass">S Pass</button>
         <button class="action" type="button" data-driver-group="local">本地司机</button>
@@ -160,10 +197,24 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
       <button class="chip" id="tToday" type="button"><span class="tab-en" lang="en">Schedule</span>今日排班</button>
       <button class="chip" id="tGap" type="button"><span class="tab-en" lang="en">Coverage</span>待替班<span class="badge" id="nGap" hidden></span></button>
       <button class="chip" id="tLeave" type="button"><span class="tab-en" lang="en">Leave</span>休假记录</button>
-      <button class="chip" id="tOperators" type="button"><span class="tab-en" lang="en">Drivers</span>司机信息库</button>
+      <button class="chip" id="tOperators" type="button"><span class="tab-en" lang="en">Operator Directory</span>司机名册</button>
     </div></nav>
   </main>
 </div>
+<section class="release" id="release" role="dialog" aria-modal="true" aria-labelledby="releaseTitle" hidden>
+  <div class="release-card" id="releaseCard">
+    <img class="release-logo" src="data:image/png;base64,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" alt="" width="36" height="36">
+    <p class="eyebrow" id="releaseEyebrow"></p>
+    <h2 id="releaseTitle"></h2>
+    <p class="release-date" id="releaseDate"></p>
+    <div id="releaseBody"></div>
+    <div class="filters release-lang" role="group" aria-label="Language">
+      <button class="chip" id="releaseEn" type="button">EN</button>
+      <button class="chip" id="releaseZh" type="button">中文</button>
+    </div>
+    <button class="release-go" id="releaseClose" type="button"></button>
+  </div>
+</section>
 <div class="toast" id="toast" hidden></div>
 <script>
 (function(){
@@ -191,18 +242,307 @@ function dayName(iso){
 }
 let toastTimer;
 function toast(t){$('toast').textContent=t; $('toast').hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('toast').hidden=true, 3500);}
-async function report(r){
-  if(!r.tc || r.site === '工地待核'){ toast('请先核对工地和塔吊号'); return; }
-  const site = r.site.replace(/（[^）]+）$/, '');
-  const date = new Intl.DateTimeFormat('en-GB', {weekday:'long', day:'numeric', month:'long', year:'numeric', timeZone:'UTC'})
-    .format(new Date(r.date+'T00:00:00Z'));
-  const shift = {'上午':' for the morning shift', '下午':' for the afternoon shift', '白':' for the day shift',
-                 '日':' for the day shift', '夜':' for the night shift'}[r.part || r.shift] ||
-    (/^\d{1,2}:\d{2}–\d{1,2}:\d{2}$/.test(r.part || '') ? ' from ' + r.part.replace('–',' to ') : '');
-  const crane = r.tc ? ' (tower crane ' + r.tc + ')' : '';
-  const text = `Hi, could you help cover a tower crane shift at ${site}${crane} on ${date}${shift}? Please let me know if you're available. Thank you!`;
-  try{ await navigator.clipboard.writeText(text); toast('英文邀班已复制'); }
-  catch(e){ prompt('复制英文邀班', text); }
+/* COMPOSE_START */
+function isoPlus(iso, n) {
+  const d = new Date(iso + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+function formatDate(iso, today, lang) {
+  const [y, m, d] = iso.split('-').map(Number);
+  const showYear = today && iso.slice(0, 4) !== today.slice(0, 4);
+  if (lang === 'zh') return (showYear ? y + '年' : '') + m + '月' + d + '日';
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return d + ' ' + months[m - 1] + (showYear ? ' ' + y : '');
+}
+function shiftKind(shift) {
+  if (!shift) return '';
+  if (shift === '夜' || shift.startsWith('夜')) return 'night';
+  if (shift === '下午') return 'afternoon';
+  if (shift === '日' || shift === '白' || shift === '上午') return 'day';
+  return '';
+}
+function shiftLabel(shift, lang) {
+  const en = {日:'day shift', 白:'day shift', 夜:'night shift', 上午:'morning shift', 下午:'afternoon shift'};
+  const zh = {日:'日班', 白:'白班', 夜:'夜班', 上午:'上午', 下午:'下午'};
+  if (!shift) return '';
+  const table = lang === 'zh' ? zh : en;
+  if (table[shift]) return table[shift];
+  if (/^\d{1,2}:\d{2}–\d{1,2}:\d{2}$/.test(shift)) return shift;
+  return '';
+}
+function placeLine(item, lang) {
+  const bits = [];
+  if (item.site && item.site !== '工地待核') bits.push(item.site);
+  if (item.tc && !String(item.tc).includes('待核')) bits.push(item.tc);
+  const shift = shiftLabel(item.shift, lang);
+  if (shift) bits.push(shift);
+  return bits.join(lang === 'zh' ? ' ' : ', ');
+}
+function mapsLink(destination) {
+  if (!/^\d+(?:\.\d+)?,\d+(?:\.\d+)?$/.test(destination || '')) return '';
+  return 'https://maps.apple.com/?daddr=' + destination + '&dirflg=d';
+}
+function datePhrase(dates, today, lang) {
+  const sorted = [...new Set(dates)].filter(Boolean).sort();
+  const ranges = [];
+  for (const date of sorted) {
+    const last = ranges.at(-1);
+    if (last && isoPlus(last[1], 1) === date) last[1] = date;
+    else ranges.push([date, date]);
+  }
+  const one = ([a, b]) => a === b ? formatDate(a, today, lang) : (lang === 'zh'
+    ? formatDate(a, today, lang) + '至' + formatDate(b, today, lang)
+    : formatDate(a, today, lang) + ' to ' + formatDate(b, today, lang));
+  const parts = ranges.map(one);
+  if (lang === 'zh') return parts.join('、');
+  if (parts.length === 1) return parts[0];
+  if (parts.length === 2) return parts[0] + ' and ' + parts[1];
+  return parts.slice(0, -1).join(', ') + ', and ' + parts.at(-1);
+}
+function sickReason(reason) {
+  return reason === '病假' || reason === 'sick';
+}
+function leaveStage(facts) {
+  const dates = [...new Set(facts.dates || [])].filter(Boolean).sort();
+  if (!dates.length || !facts.today) return 'leave-closed';
+  const start = dates[0], end = dates.at(-1), today = facts.today;
+  if (today < start) return 'leave-before';
+  if (dates.includes(today) && sickReason(facts.reason)) return 'leave-sick';
+  if (dates.includes(today) && today === end && facts.returnDate && facts.returnDate > today) return 'leave-return';
+  if (dates.includes(today)) return 'leave-during';
+  if (today > end && facts.returnDate && facts.returnDate >= today) return 'leave-return';
+  return 'leave-closed';
+}
+function detectScene(facts) {
+  if (!facts) return '';
+  if (facts.kind === 'notice') return 'site-notice';
+  if (facts.kind === 'relief-ask') return 'relief-ask';
+  if (facts.kind === 'leave') return leaveStage(facts);
+  if (facts.kind === 'duty') {
+    if (facts.date && facts.today && facts.date > facts.today) return facts.cover ? 'relief-set' : 'upcoming';
+    return 'arrival';
+  }
+  return '';
+}
+function applicableScenes(facts) {
+  const out = [];
+  const push = id => { if (id && id !== 'leave-closed' && !out.includes(id)) out.push(id); };
+  push(detectScene(facts));
+  if (facts.kind === 'duty' && facts.date === facts.today) push('arrival');
+  if (facts.kind === 'duty' && facts.date > facts.today) push(facts.cover ? 'relief-set' : 'upcoming');
+  if (facts.kind === 'relief-ask') push('relief-ask');
+  if (facts.kind === 'notice') push('site-notice');
+  if (facts.kind === 'leave') {
+    if ((facts.dates || []).length) push('leave-before');
+    if ((facts.dates || []).includes(facts.today)) push('leave-during');
+    if (facts.returnDate && facts.returnDate >= facts.today) push('leave-return');
+    if (sickReason(facts.reason)) push('leave-sick');
+  }
+  return out;
+}
+function knownSlots(slots) {
+  return (slots || []).filter(slot => slot && slot.site && slot.site !== '工地待核');
+}
+function arrivalText(facts, lang) {
+  const slots = facts.slots || [];
+  if (!slots.length) return '';
+  const morning = slots.every(slot => shiftKind(slot.shift) === 'day');
+  const places = slots.length > 1 ? knownSlots(slots).map(slot => placeLine(slot, lang)).filter(Boolean) : [];
+  if (lang === 'zh') {
+    if (places.length) return (morning ? '早上好，到' : '到') + places.join('，以及') + '了吗？';
+    return morning ? '早上好，到工地了吗？' : '到工地了吗？';
+  }
+  if (places.length) return (morning ? 'Good morning! Have you reached ' : 'Hi, have you reached ') + places.join('; ') + '?';
+  return morning ? 'Good morning! Have you reached the site?' : 'Hi, have you reached the site?';
+}
+function dutyText(facts, lang) {
+  const slots = knownSlots(facts.slots);
+  if (!facts.date || !slots.length) return '';
+  const date = formatDate(facts.date, facts.today, lang);
+  const places = slots.map(slot => placeLine(slot, lang)).filter(Boolean);
+  if (!places.length) return '';
+  let text = lang === 'zh' ? date + '是' + places.join('；') + '。'
+    : (places.length === 1 ? 'Hi, your shift on ' + date + ' is at ' + places[0] + '.'
+      : 'Hi, your shifts on ' + date + ' are: ' + places.join('; ') + '.');
+  if (facts.covering && facts.covering !== '人员待核') text += lang === 'zh' ? '替 ' + facts.covering + '。' : ' You are covering ' + facts.covering + '.';
+  return text;
+}
+function leaveBeforeText(facts, lang) {
+  const dates = facts.dates || [];
+  if (!dates.length) return '';
+  let phrase = datePhrase(dates, facts.today, lang);
+  const extra = shiftLabel(facts.part, lang);
+  if (extra) phrase += lang === 'zh' ? '（' + extra + '）' : ' (' + extra + ')';
+  const ranged = phrase.includes(' to ') || phrase.includes('至');
+  if (lang === 'zh') return '想确认一下，' + phrase + (facts.pending ? '的休假是否照常？' : '的休假还是这样吗？');
+  const when = (ranged ? 'from ' : 'on ') + phrase;
+  return facts.pending
+    ? 'Hi, just checking if the leave ' + when + ' is going ahead.'
+    : 'Hi, just checking if your leave ' + when + ' is still the same.';
+}
+function returnText(facts, lang) {
+  if (!facts.returnDate) return '';
+  const date = formatDate(facts.returnDate, facts.today, lang);
+  const places = (facts.returnSlots || []).length > 1 ? knownSlots(facts.returnSlots).map(slot => placeLine(slot, lang)).filter(Boolean) : [];
+  if (lang === 'zh') return '想确认一下，你还是' + date + '回来上班吗？' + (places.length ? places.join('；') + '。' : '');
+  if (!places.length) return "Hi, just checking if you're still returning to work on " + date + '.';
+  return "Hi, just checking if you're still returning to work on " + date + ' at ' + places.join('; ') + '.';
+}
+function reliefAskText(facts, lang) {
+  if (!facts.date || !facts.site || facts.site === '工地待核') return '';
+  const date = formatDate(facts.date, facts.today, lang);
+  let place = facts.site;
+  if (facts.tc && !String(facts.tc).includes('待核')) place += lang === 'zh' ? ' ' + facts.tc : ', ' + facts.tc;
+  const shift = shiftLabel(facts.shift, lang);
+  if (shift) place += lang === 'zh' ? ' ' + shift : ', ' + shift;
+  let text = lang === 'zh' ? date + ' ' + place + '，你方便来吗？' : 'Hi, are you available to work at ' + place + ' on ' + date + '?';
+  const link = mapsLink(facts.navigation);
+  if (link) text += lang === 'zh' ? '\n定位：' + link : '\nLocation: ' + link;
+  return text;
+}
+function noticeText(facts, lang) {
+  if (!facts.date) return '';
+  const lines = [];
+  for (const item of facts.items || []) {
+    const place = placeLine(item, lang);
+    if (!place) continue;
+    let line = place;
+    if (item.who && item.who !== '人员待核') {
+      line += item.pending
+        ? (lang === 'zh' ? '（' + item.who + ' 休假待确认）' : ' (' + item.who + ', leave not confirmed)')
+        : (lang === 'zh' ? '（' + item.who + ' 休假）' : ' (' + item.who + ' on leave)');
+    }
+    lines.push(line);
+  }
+  if (!lines.length) return '';
+  const date = formatDate(facts.date, facts.today, lang);
+  const body = lines.map(line => '• ' + line).join('\n');
+  return lang === 'zh' ? date + '还有这些岗位没安排：\n' + body : date + ', still to arrange:\n' + body;
+}
+function containsPhone(text, facts) {
+  for (const phone of facts.phones || []) {
+    const digits = String(phone || '').replace(/\D/g, '');
+    if (digits.length >= 8 && text.includes(digits)) return true;
+  }
+  return false;
+}
+function composeFail(lang, key) {
+  const copy = {
+    en: {
+      closed: 'This leave has ended, and there is no return date to confirm.',
+      missing: 'This message needs a site and a date from the roster.',
+      private: 'The message cannot include a phone number.'
+    },
+    zh: {
+      closed: '这场休假已结束，没有可确认的返岗日期。',
+      missing: '排班里没有工地或日期，不能生成这句。',
+      private: '消息里不能写电话号码。'
+    }
+  };
+  return {ok:false, text:'', scene:'', reason:(copy[lang] || copy.en)[key]};
+}
+function composeMessage(facts, scene, lang) {
+  const language = lang === 'zh' ? 'zh' : 'en';
+  const chosen = scene || detectScene(facts);
+  let text = '';
+  if (chosen === 'arrival') text = arrivalText(facts, language);
+  else if (chosen === 'upcoming' || chosen === 'relief-set') text = dutyText(facts, language);
+  else if (chosen === 'leave-before') text = leaveBeforeText(facts, language);
+  else if (chosen === 'leave-during') text = language === 'zh' ? '最近还好吗？' : 'Hi, hope everything is going well.';
+  else if (chosen === 'leave-sick') text = sickReason(facts.reason) ? (language === 'zh' ? '今天身体怎么样？' : 'Hi, how are you feeling today?') : '';
+  else if (chosen === 'leave-return') text = returnText(facts, language);
+  else if (chosen === 'relief-ask') text = reliefAskText(facts, language);
+  else if (chosen === 'site-notice') text = noticeText(facts, language);
+  else if (chosen === 'leave-closed') return composeFail(language, 'closed');
+  if (!text) return composeFail(language, 'missing');
+  if (containsPhone(text, facts)) return composeFail(language, 'private');
+  return {ok:true, text, scene:chosen, reason:''};
+}
+/* COMPOSE_END */
+/* 版本是否弹出只看发布记录和本机已读版本号。判断不读页面，以后别的内部页可以整段抄走。 */
+/* RELEASES_START */
+function seenVersion(value){
+  return typeof value === 'string' && /^\d{4}\.\d{2}\.\d{2}$/.test(value) ? value : '';
+}
+function releaseLines(entry, language, field){
+  const block = entry && entry[field];
+  if(!block) return [];
+  const list = Array.isArray(block[language]) ? block[language] : [];
+  return list.filter(item => typeof item === 'string' && item);
+}
+function releaseNotice(record, seen){
+  const history = (record && Array.isArray(record.entries) ? record.entries : [])
+    .filter(entry => entry && (!entry.status || entry.status === 'released') && seenVersion(entry.version) && /^\d{4}-\d{2}-\d{2}$/.test(entry.date || ''))
+    .slice()
+    .sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : a.version < b.version ? 1 : a.version > b.version ? -1 : 0);
+  const current = history[0] || null;
+  const read = seenVersion(seen);
+  let popup = null;
+  if(current && !read) popup = 'intro';
+  else if(current && read !== current.version && current.notice === 'major') popup = 'update';
+  return {popup, current, history, seen: read};
+}
+/* RELEASES_END */
+const RELEASE_RECORD = {"page":"leave","entries":[{"version":"2026.11.28","date":"2026-11-28","notice":"major","kind":"feature","added":{"zh":["第四页改为司机名册","已核实的国籍显示在姓名右边，点国旗可以看到国家名称","排班和休假的消息按当天的情况生成，默认是英文"],"en":["The fourth page is now Operator Directory","A checked nationality shows beside the name. Tap the flag to read the country","Schedule and leave messages follow the day. English is the default"]},"improved":{"zh":["排班行以常用称呼和头像为主，证件姓名放在下面","没有照片时显示姓名首字母","国籍没核实的，不显示国旗"],"en":["A shift row leads with the everyday name and initials. The document name sits underneath","A person without a photo gets initials","No flag appears unless the nationality is checked"]},"fixes":{"zh":[],"en":[]},"highlights":{"zh":["今日排班、待替班、休假记录、司机名册","待替班可以找人，或复制英文消息","国籍只用来认出是谁，不改变排班顺序","有已核号码时可以打电话或发 WhatsApp"],"en":["Schedule, coverage, leave, and the operator directory","Coverage can find a driver, or copy an English message","Nationality is only for recognition. It does not change who is assigned","A checked number can call or open WhatsApp"]}},{"version":"2026.11.27","date":"2026-11-27","notice":"major","kind":"feature","added":{"zh":["司机分成 S Pass、本地司机、替班司机","工地有确认坐标时，点工地名或导航，打开苹果地图驾车路线"],"en":["Drivers are grouped into S Pass, local, and relief","A confirmed site location opens Apple Maps driving directions"]},"improved":{"zh":["没有确认坐标的工地不再打开错误地点"],"en":["A site without a confirmed location no longer opens the wrong place"]},"fixes":{"zh":[],"en":[]},"highlights":{"zh":["今日排班、待替班、休假记录、司机信息库","待替班可以找人，或复制英文邀班","休假可以按日历看即将到来和本月已过的日期","有已核号码时可以打电话或发 WhatsApp"],"en":["Schedule, coverage, leave, and drivers","Coverage can find a driver, or copy an English request","Leave can be checked on a calendar for coming dates and earlier this month","A checked number can call or open WhatsApp"]}}]};
+const SCENE_LABEL = {
+  en: {arrival:'Arrival', upcoming:'Assignment', 'relief-set':'Cover set', 'relief-ask':'Cover ask', 'leave-before':'Before leave', 'leave-during':'On leave', 'leave-sick':'Sick leave', 'leave-return':'Return', 'site-notice':'Site notice'},
+  zh: {arrival:'到岗', upcoming:'上岗安排', 'relief-set':'替班已定', 'relief-ask':'找替班', 'leave-before':'休假前', 'leave-during':'休假中', 'leave-sick':'病假', 'leave-return':'返岗', 'site-notice':'现场通知'}
+};
+function sceneLabel(id){ return (SCENE_LABEL[lang] || SCENE_LABEL.en)[id] || id; }
+async function copyText(text){
+  try{ await navigator.clipboard.writeText(text); toast(lang === 'zh' ? '已复制' : 'Copied'); }
+  catch(e){ prompt(lang === 'zh' ? '复制' : 'Copy', text); }
+}
+function composerActions(facts, phone, personName){
+  const scenes = applicableScenes(facts);
+  if(!scenes.length){
+    const blocked = composeMessage(facts, detectScene(facts), lang);
+    return el('p','hint', blocked.reason);
+  }
+  let scene = scenes.includes(detectScene(facts)) ? detectScene(facts) : scenes[0];
+  const box = el('div','actions');
+  const current = () => composeMessage(facts, scene, lang);
+  if(scenes.length > 1){
+    const select = document.createElement('select');
+    select.className = 'scene-choice';
+    select.setAttribute('aria-label', lang === 'zh' ? '沟通场景' : 'Message');
+    for(const id of scenes){
+      const option = document.createElement('option');
+      option.value = id; option.textContent = sceneLabel(id);
+      if(id === scene) option.selected = true;
+      select.append(option);
+    }
+    select.onchange = () => { scene = select.value; refreshWa(); };
+    box.append(select);
+  }
+  box.append(action(lang === 'zh' ? '复制' : 'Copy', () => {
+    const msg = current();
+    if(!msg.ok){ toast(msg.reason); return; }
+    copyText(msg.text);
+  }));
+  let wa;
+  function refreshWa(){
+    if(!wa || !phone) return;
+    const msg = current();
+    const url = new URL('https://wa.me/' + String(phone).replace(/\D/g, ''));
+    if(msg.ok) url.searchParams.set('text', msg.text);
+    wa.href = url.href;
+  }
+  if(phone){
+    wa = whatsappLink(phone, 'WhatsApp');
+    if(personName) wa.setAttribute('aria-label', 'WhatsApp ' + personName);
+    wa.addEventListener('click', event => {
+      const msg = current();
+      if(!msg.ok){ event.preventDefault(); toast(msg.reason); return; }
+      const url = new URL(wa.href);
+      url.searchParams.set('text', msg.text);
+      wa.href = url.href;
+    });
+    refreshWa();
+    box.append(wa);
+  }
+  return box;
 }
 function action(label, run){
   const b = el('button','action',label); b.type = 'button'; b.onclick = run; return b;
@@ -217,25 +557,13 @@ function whatsappLink(phone, label='WhatsApp', message=''){
   link.rel = 'noopener noreferrer';
   return link;
 }
-function contacts(phone, name){
-  const group = el('div','contact-actions');
-  const call = el('a','call','Call');
-  call.href = 'tel:' + phone.replace(/[^\d+]/g,'');
-  const whatsapp = whatsappLink(phone);
-  if(name){
-    call.setAttribute('aria-label','Call ' + name);
-    whatsapp.setAttribute('aria-label','WhatsApp ' + name);
-  }
-  group.append(call, whatsapp);
-  return group;
-}
 const info = name => (data.people || {})[name] || {full:'', types:[], certificates:[]};
 const pretty = phone => phone.replace(/^\+65(\d{4})(\d{4})$/, '+65 $1 $2');
 function details(name, phone, note){
   const p = info(name), d = el('details'), s = el('summary','',name);
   if(note) s.append(el('small','',note));
   d.append(s);
-  const lines = [p.full && '全名：' + p.full, phone && '手机：' + pretty(phone),
+  const lines = [p.full && '全名：' + p.full,
                  p.types.length ? '能开：' + p.types.join('、') : '能开机型：未登记', ...p.certificates];
   for(const line of lines.filter(Boolean)) d.append(el('div','detail',line));
   return d;
@@ -250,21 +578,232 @@ function coverageCard(r){
   c.append(b);
   return c;
 }
+function navigationFor(date, site){
+  const day = (data.schedule || []).find(item => item.date === date);
+  if(!day || !site) return '';
+  const hits = day.sites.filter(item => item.site === site && item.navigation);
+  return hits.length === 1 ? hits[0].navigation : '';
+}
+function shiftFor(date, site, tc){
+  const day = (data.schedule || []).find(item => item.date === date);
+  if(!day) return '';
+  const hits = [];
+  for(const siteRow of day.sites){
+    if(site && siteRow.site !== site) continue;
+    for(const slot of siteRow.slots) if(slot.tc === tc && slot.shift) hits.push(slot.shift);
+  }
+  return hits.length === 1 ? hits[0] : '';
+}
+function dutySlots(name, date){
+  const day = (data.schedule || []).find(item => item.date === date);
+  if(!day || !name) return [];
+  const out = [];
+  for(const site of day.sites){
+    for(const slot of site.slots){
+      if(slot.name === name && (slot.state === 'ok' || slot.state === 'cover'))
+        out.push({site:site.site, tc:slot.tc, shift:slot.shift, cover:slot.state === 'cover'});
+    }
+  }
+  return out;
+}
+function returnDateFor(name, after){
+  const hits = [];
+  for(const day of data.schedule || []){
+    if(!after || day.date <= after) continue;
+    if(dutySlots(name, day.date).length) hits.push(day.date);
+  }
+  hits.sort();
+  return hits[0] || '';
+}
+function reliefFacts(row){
+  return {kind:'relief-ask', today:sg(), date:row.date, site:row.site, tc:row.tc,
+    shift:row.shift || shiftFor(row.date, row.site, row.tc), navigation:navigationFor(row.date, row.site),
+    phones:row.who_phone ? [row.who_phone] : []};
+}
 function coverageActions(row){
   const actions = el('div','actions');
-  actions.append(action('找人', findRelief), action('复制英文邀班', () => report(row)));
+  actions.append(action('找人', () => findRelief(row)), composerActions(reliefFacts(row), '', ''));
   return actions;
 }
 function jumpDriverGroup(group){
   $('drivers-' + group)?.scrollIntoView({behavior:'auto',block:'start'});
 }
-function findRelief(){
+function findRelief(row){
+  ask = {date:row.date, site:row.site, tc:row.tc, shift:row.shift || shiftFor(row.date, row.site, row.tc), navigation:navigationFor(row.date, row.site)};
   switchTab('operators');
   jumpDriverGroup('relief');
 }
 const LABEL = {ok:'', cover:'顶班', gap:'待替班', open:'没排人', rest:'休', none:'无人'};
 const TABS = {tToday:'today', tGap:'gap', tLeave:'leave', tOperators:'operators'};
-let tab = 'today', past = false, dayAt = null, coverageDate = '';
+let lang = 'en', ask = null, releaseMode = null, releaseArmed = false;
+const RELEASE_LABEL = {
+  zh: {eyebrow:'更新说明', history:'更新记录', intro:'现在可以用', added:'新增', improved:'优化', fixes:'修复', notice:'公告', close:'知道了', version:'版本 '},
+  en: {eyebrow:"What's New", history:'Updates', intro:'This page can', added:'New', improved:'Changes', fixes:'Fixes', notice:'Notice', close:'Got it', version:'Version '}
+};
+function readSeen(){
+  try { return seenVersion(localStorage.getItem('jiaan-leave-seen')); }
+  catch (e) { return ''; }
+}
+function writeSeen(version){
+  const clean = seenVersion(version);
+  if(!clean) return;
+  try { localStorage.setItem('jiaan-leave-seen', clean); } catch (e) {}
+}
+function addReleaseGroup(parent, title, items){
+  if(!items.length) return;
+  parent.append(el('p', 'release-kicker', title));
+  const list = el('ul');
+  for(const item of items) list.append(el('li', '', item));
+  parent.append(list);
+}
+function renderRelease(){
+  const view = releaseNotice(RELEASE_RECORD, readSeen());
+  const language = lang === 'zh' ? 'zh' : 'en';
+  const label = RELEASE_LABEL[language];
+  const box = $('release');
+  if(!releaseMode || !view.current){ box.hidden = true; return; }
+  box.hidden = false;
+  const historyMode = releaseMode === 'history';
+  $('releaseEyebrow').textContent = historyMode ? label.history : label.eyebrow;
+  $('releaseTitle').textContent = view.current.version;
+  $('releaseDate').textContent = view.current.date;
+  $('releaseClose').textContent = label.close;
+  $('releaseEn').setAttribute('aria-pressed', language === 'en');
+  $('releaseZh').setAttribute('aria-pressed', language === 'zh');
+  const body = $('releaseBody');
+  body.replaceChildren();
+  addReleaseGroup(body, label.intro, releaseLines(view.current, language, 'highlights'));
+  const entries = historyMode ? view.history : [view.current];
+  for(const entry of entries){
+    const block = historyMode ? el('section', 'release-entry') : body;
+    if(historyMode){
+      block.append(el('h3', '', entry.version));
+      block.append(el('p', 'release-date', entry.date));
+      if(entry.kind === 'notice') block.append(el('p', 'release-kicker', label.notice));
+    } else if(view.current.kind === 'notice') {
+      body.append(el('p', 'release-kicker', label.notice));
+    }
+    addReleaseGroup(block, label.added, releaseLines(entry, language, 'added'));
+    addReleaseGroup(block, label.improved, releaseLines(entry, language, 'improved'));
+    if(historyMode) addReleaseGroup(block, label.fixes, releaseLines(entry, language, 'fixes'));
+    if(historyMode) body.append(block);
+  }
+}
+function openRelease(mode){
+  releaseMode = mode;
+  renderRelease();
+  if(!$('release').hidden) $('releaseClose').focus();
+}
+function closeRelease(){
+  const view = releaseNotice(RELEASE_RECORD, readSeen());
+  if(view.current) writeSeen(view.current.version);
+  releaseMode = null;
+  $('release').hidden = true;
+}
+function maybeAnnounce(){
+  if(releaseArmed) return;
+  releaseArmed = true;
+  const view = releaseNotice(RELEASE_RECORD, readSeen());
+  if(view.popup) openRelease(view.popup);
+}
+function paintFoot(){
+  const hint = tab === 'operators' ? '派工前请核对证件类别及有效期。' : '这是计划排班。机型带「推定」的，派工前先确认。';
+  const view = releaseNotice(RELEASE_RECORD, readSeen());
+  $('foot').hidden = false;
+  $('foot').replaceChildren(document.createTextNode(hint));
+  if(!view.current) return;
+  const language = lang === 'zh' ? 'zh' : 'en';
+  const button = el('button', 'ver', RELEASE_LABEL[language].version + view.current.version);
+  button.type = 'button';
+  button.onclick = () => openRelease('history');
+  $('foot').append(button);
+}
+let tab = 'today', past = false, dayAt = null, coverageDate = '', directoryQuery = '', focusRef = '';
+const NATION_NAME = {BD:{zh:'孟加拉',en:'Bangladesh'},CN:{zh:'中国',en:'China'},ID:{zh:'印度尼西亚',en:'Indonesia'},IN:{zh:'印度',en:'India'},LK:{zh:'斯里兰卡',en:'Sri Lanka'},MM:{zh:'缅甸',en:'Myanmar'},MY:{zh:'马来西亚',en:'Malaysia'},NP:{zh:'尼泊尔',en:'Nepal'},PH:{zh:'菲律宾',en:'Philippines'},SG:{zh:'新加坡',en:'Singapore'},TH:{zh:'泰国',en:'Thailand'},VN:{zh:'越南',en:'Vietnam'}};
+function initials(name){
+  const text = (name || '').trim();
+  if(!text || text === '人员待核') return '·';
+  if(/[\u3400-\u9fff]/.test(text)) return [...text][0];
+  const letters = text.split(/\s+/).map(part => [...part][0]).filter(ch => /[A-Za-z]/.test(ch || ''));
+  if(letters.length >= 2) return (letters[0] + letters[1]).toUpperCase();
+  if(letters.length === 1) return letters[0].toUpperCase();
+  return [...text][0];
+}
+function flagEmoji(code){
+  return /^[A-Z]{2}$/.test(code || '') ? String.fromCodePoint(...[...code].map(ch => 127397 + ch.charCodeAt(0))) : '';
+}
+function flagButton(code){
+  const names = NATION_NAME[code];
+  const emoji = flagEmoji(code);
+  if(!names || !emoji) return null;
+  const language = lang === 'zh' ? 'zh' : 'en';
+  const button = el('button', 'flag', emoji);
+  button.type = 'button';
+  button.title = names[language];
+  button.setAttribute('aria-label', names[language]);
+  button.setAttribute('aria-pressed', 'false');
+  button.onclick = event => {
+    event.stopPropagation();
+    const open = button.getAttribute('aria-pressed') === 'true';
+    button.setAttribute('aria-pressed', String(!open));
+    button.textContent = open ? emoji : names[language];
+  };
+  return button;
+}
+function identityBlock(person, compact){
+  const row = el('div', compact ? 'identity compact' : 'identity');
+  const face = el('span', compact ? 'avatar sm' : 'avatar', initials(person.name));
+  face.setAttribute('aria-hidden', 'true');
+  const main = el('div', 'identity-main');
+  const top = el('div', 'name-row');
+  top.append(el(compact ? 'strong' : 'h3', 'display-name', person.name || ''));
+  const flag = flagButton(person.nation);
+  if(flag) top.append(flag);
+  main.append(top);
+  if(person.legal) main.append(el('p', 'legal', person.legal));
+  row.append(face, main);
+  return row;
+}
+function showOperator(ref){
+  if(!ref) return;
+  tab = 'operators';
+  focusRef = ref;
+  directoryQuery = '';
+  const input = $('directoryFind');
+  if(input) input.value = '';
+  draw();
+}
+function scheduleIdentity(slot){
+  const row = el('div', 'identity compact');
+  const face = el(slot.ref ? 'button' : 'span', 'avatar sm', initials(slot.name));
+  if(slot.ref){
+    face.type = 'button';
+    face.setAttribute('aria-label', slot.name || '');
+    face.onclick = () => showOperator(slot.ref);
+  } else face.setAttribute('aria-hidden', 'true');
+  const main = el('div', 'identity-main');
+  const top = el('div', 'name-row');
+  const heading = el(slot.ref ? 'button' : 'strong', 'display-name', slot.name || '');
+  if(slot.ref){
+    heading.type = 'button';
+    heading.classList.add('identity-jump');
+    heading.onclick = () => showOperator(slot.ref);
+  }
+  top.append(heading);
+  const flag = flagButton(slot.nation);
+  if(flag) top.append(flag);
+  main.append(top);
+  if(slot.legal) main.append(el('p', 'legal', slot.legal));
+  row.append(face, main);
+  return row;
+}
+function personMatches(person, query){
+  if(!query) return true;
+  return [person.name, person.legal, person.seek].join(' ').toLowerCase().includes(query);
+}
+function rosterNote(note){
+  return (note || '').split('；').map(part => part.trim()).filter(part => part && part !== '日安排' && part !== '已确认排班').join('；');
+}
 let leaveMonth = '', leaveDate = '';
 function switchTab(next){
   tab = next;
@@ -275,26 +814,51 @@ function switchTab(next){
 function drawOperators(list){
   const people = data.operators || [];
   const labels = {'平桥':'Saddle Jib','上下桥':'Luffing Jib'};
+  if(ask){
+    const bar = el('div','ask-bar');
+    bar.append(el('span','', '正在问：' + dayName(ask.date) + ' ' + (ask.site || '') + ' ' + (ask.tc || '')));
+    bar.append(action('清除', () => { ask = null; draw(); }));
+    list.append(bar);
+  }
+  const query = directoryQuery.trim().toLowerCase();
+  let shown = 0;
   for(const [group,title] of [['spass','S Pass'],['local','本地司机'],['relief','替班司机']]){
+    const groupPeople = people.filter(person => (person.group || 'relief') === group && personMatches(person, query))
+      .sort((a,b) => (!!b.phone - !!a.phone) || a.name.localeCompare(b.name));
+    if(query && !groupPeople.length) continue;
+    shown += groupPeople.length;
     const section = el('section','driver-section');
     section.id = 'drivers-' + group;
     section.append(el('h2','',title));
-    const groupPeople = people.filter(person => (person.group || 'relief') === group)
-      .sort((a,b) => (!!b.phone - !!a.phone) || a.name.localeCompare(b.name));
     for(const p of groupPeople){
-      const box = el('article','person'), line = el('div','line');
-      const heading = el('div','relief-heading');
-      heading.append(el('h3','',p.name));
-      for(const type of p.types) if(labels[type]) heading.append(chip(labels[type]));
-      line.append(heading);
-      if(p.phone) line.append(whatsappLink(p.phone));
-      box.append(line);
-      for(const detail of [p.note, p.area && '居住位置：' + p.area, p.phone && '手机：' + pretty(p.phone)].filter(Boolean))
-        box.append(el('div','detail',detail));
+      const box = el('article','person');
+      if(p.ref) box.id = 'op-' + p.ref;
+      box.append(identityBlock(p, false));
+      const types = el('div','type-row');
+      for(const type of p.types) if(labels[type]) types.append(chip(labels[type]));
+      if(!types.childElementCount) types.append(el('span','detail','机型未登记'));
+      const facts = el('div','facts');
+      if(p.area) facts.append(el('div','detail','居住地区：' + p.area));
+      for(const cert of p.certificates || []) facts.append(el('div','detail', cert));
+      const actions = el('div','actions');
+      if(p.phone){
+        const call = el('a','call', lang === 'zh' ? '电话' : 'Call');
+        call.href = 'tel:' + p.phone.replace(/[^\d+]/g, '');
+        call.setAttribute('aria-label', '打电话给' + (p.name || ''));
+        actions.append(call, whatsappLink(p.phone));
+      }
+      if(ask) actions.append(composerActions({kind:'relief-ask', today:sg(), date:ask.date, site:ask.site, tc:ask.tc, shift:ask.shift, navigation:ask.navigation, phones:p.phone ? [p.phone] : []}, p.phone || '', p.name));
+      box.append(types, facts, actions);
       section.append(box);
     }
     if(!groupPeople.length) section.append(el('p','empty','本组暂无记录。'));
     list.append(section);
+  }
+  if(query && !shown) list.append(el('p','empty','没有匹配的司机。'));
+  if(focusRef){
+    const node = document.getElementById('op-' + focusRef);
+    focusRef = '';
+    if(node) node.scrollIntoView({block:'center'});
   }
 }
 function dateRanges(dates){
@@ -381,18 +945,40 @@ function drawLeave(list, rows){
     heading.append(el('h3','',name));
     if(info(name).full) heading.append(el('p','leave-full',info(name).full));
     header.append(heading);
-    if(!past && phones.size === 1){
-      header.append(whatsappLink([...phones][0],'WhatsApp 确认休假',
-        'Hi, could you please confirm whether your upcoming leave dates are still the same? Thank you.'));
+    const dates = [];
+    const parts = new Set();
+    let pending = false;
+    for(const slot of slots.values()){
+      for(const group of slot.dates.values()){
+        dates.push(...group.dates);
+        if(group.r.part) parts.add(group.r.part);
+        if(group.r.pending) pending = true;
+      }
     }
+    const unique = [...new Set(dates)].sort();
+    const end = unique.at(-1) || '';
+    const returnDate = returnDateFor(name, end);
+    const phone = phones.size === 1 ? [...phones][0] : '';
+    header.append(composerActions({
+      kind:'leave', today:sg(), dates:unique, pending, part:parts.size === 1 ? [...parts][0] : '',
+      returnDate, returnSlots:returnDate ? dutySlots(name, returnDate) : [], phones:[...phones], reason:''
+    }, phone, name));
     box.append(header);
-    for(const {site,tc,dates} of slots.values()){
+    for(const {site,tc,dates:slotDates} of slots.values()){
       const item = el('div','leave-item');
       item.append(el('strong','',site + ' · ' + (tc || '塔吊待核')));
-      for(const {r,dates:days} of dates.values()){
+      for(const {r,dates:days} of slotDates.values()){
         const line = el('p','leave-dates',leaveDateText(days,r.part));
         if(r.pending) line.append(el('span','tag','请假待确认'));
         if(r.rep) line.append(el('small','',r.rep+' 顶班'));
+        if(r.rep && r.rep !== '人员待核' && r.rep_phone !== phone){
+          const date = days.filter(day => day >= sg()).sort()[0] || [...days].sort()[0];
+          item.append(composerActions({
+            kind:'duty', today:sg(), date, cover:true, covering:name,
+            phones:r.rep_phone ? [r.rep_phone] : [],
+            slots:[{site, tc, shift:shiftFor(date, site, tc) || r.part || ''}]
+          }, r.rep_phone || '', r.rep));
+        }
         item.append(line);
       }
       box.append(item);
@@ -408,6 +994,13 @@ function drawCoverage(list, dates, gaps){
     const block = el('section','coverage-day');
     block.id = 'coverage-' + date;
     block.append(el('h2','',dayName(date)));
+    if(leave.length || open.length) block.append(composerActions({
+      kind:'notice', today:sg(), date, phones:[],
+      items:[
+        ...leave.map(row => ({site:row.site, tc:row.tc, shift:row.part || shiftFor(date, row.site, row.tc), who:row.who, pending:!!row.pending})),
+        ...open.map(row => ({site:row.site, tc:row.tc, shift:row.shift || ''}))
+      ]
+    }, '', ''));
     if(leave.length){
       block.append(el('h3','',`待替班 ${leave.length}`));
       for(const row of leave) block.append(coverageCard(row));
@@ -446,15 +1039,30 @@ function navigationLink(site){
   link.title = '导航到' + site.site;
   return link;
 }
-function slotRow(x){
+function slotRow(x, date, site){
   const row = el('div','slot ' + x.state), tc = el('div','tc', `${x.tc}${x.shift ? ' '+x.shift : ''}`);
   tc.append(chip(x.crane));
   const nm = el('div','nm');
-  if(x.name) nm.append(details(x.name, x.phone, x.note));
-  else nm.textContent = x.state==='none' ? '—' : x.state==='open' ? '？' : '';
+  if(x.name){
+    nm.append(scheduleIdentity(x));
+    const note = rosterNote(x.note);
+    if(note) nm.append(el('p','legal', note));
+  } else nm.textContent = x.state==='none' ? '—' : x.state==='open' ? '？' : '';
+  if(x.name && x.name !== '人员待核' && (x.state === 'ok' || x.state === 'cover')){
+    const slots = dutySlots(x.name, date);
+    nm.append(composerActions({
+      kind:'duty', today:sg(), date, cover:x.state === 'cover', phones:x.phone ? [x.phone] : [],
+      slots:slots.length ? slots : [{site, tc:x.tc, shift:x.shift}]
+    }, x.phone || '', x.name));
+  }
   row.append(tc, nm);
   if(LABEL[x.state]) row.append(el('span','st', LABEL[x.state]));
-  if(x.phone && (x.state==='ok' || x.state==='cover')) row.append(contacts(x.phone, x.name));
+  if(x.phone && (x.state === 'ok' || x.state === 'cover')){
+    const call = el('a','call', lang === 'zh' ? '电话' : 'Call');
+    call.href = 'tel:' + x.phone.replace(/[^\d+]/g, '');
+    call.setAttribute('aria-label', 'Call ' + (x.name || ''));
+    row.append(call);
+  }
   return row;
 }
 function openSlots(day){
@@ -489,7 +1097,7 @@ function drawToday(list){
     else tools.append(el('span','','位置待核'));
     h.append(tools);
     box.append(h);
-    for(const x of s.slots) box.append(slotRow(x));
+    for(const x of s.slots) box.append(slotRow(x, d.date, s.site));
     list.append(box);
   }
   if(!shown) list.append(el('p','empty','没找到。'));
@@ -504,13 +1112,15 @@ function draw(){
   $('nGap').textContent = urgent;
   $('nGap').hidden = !urgent;
   for(const [id,name] of Object.entries(TABS)) $(id).setAttribute('aria-pressed', tab===name);
+  $('langEn').setAttribute('aria-pressed', lang==='en');
+  $('langZh').setAttribute('aria-pressed', lang==='zh');
   $('daybar').hidden = tab !== 'today'; $('when').hidden = tab !== 'leave';
   $('leaveCalendar').hidden = tab !== 'leave';
   $('coverageJump').hidden = tab !== 'gap';
   $('directoryJump').hidden = tab !== 'operators';
+  $('directoryFindWrap').hidden = tab !== 'operators';
   $('wNext').setAttribute('aria-pressed', !past); $('wPast').setAttribute('aria-pressed', past);
-  $('foot').hidden = false;
-  $('foot').textContent = tab === 'operators' ? '派工前请核对证件类别及有效期。' : '这是计划排班。机型带「推定」的，派工前先确认。';
+  paintFoot();
   const list = $('list'); list.replaceChildren();
   if(tab === 'today'){ drawToday(list); return; }
   if(tab === 'operators'){ drawOperators(list); return; }
@@ -544,7 +1154,7 @@ async function load(){
   if(!k){ $('sub').textContent = '请用群里发的完整链接打开。'; return; }
   try{ data = await open(k); }
   catch(e){ $('app').hidden = true; $('sub').textContent = e.name==='OperationError' ? '这个链接已经失效，请要一个新链接。' : '打不开，请检查网络后再试。'; return; }
-  store.set(k); $('app').hidden = false; draw();
+  store.set(k); $('app').hidden = false; draw(); maybeAnnounce();
 }
 for(const [id,next] of Object.entries(TABS)) $(id).onclick = () => switchTab(next);
 for(const button of $('directoryJump').querySelectorAll('button')){
@@ -555,6 +1165,24 @@ $('jumpTomorrow').onclick = () => jumpCoverage(plus(sg(),1));
 $('coverageDate').onchange = event => jumpCoverage(event.target.value);
 $('wNext').onclick = () => { past = false; leaveDate = ''; leaveMonth = ''; draw(); };
 $('wPast').onclick = () => { past = true; leaveDate = ''; leaveMonth = ''; draw(); };
+function rememberLang(next){
+  lang = next;
+  try{ localStorage.setItem('jiaan-leave-lang', next); }catch(e){}
+  if(data) draw();
+  else { $('langEn').setAttribute('aria-pressed', lang==='en'); $('langZh').setAttribute('aria-pressed', lang==='zh'); }
+  if(releaseMode) renderRelease();
+}
+try{ const saved = localStorage.getItem('jiaan-leave-lang'); if(saved === 'zh' || saved === 'en') lang = saved; }catch(e){}
+$('langEn').onclick = () => rememberLang('en');
+$('langZh').onclick = () => rememberLang('zh');
+$('langEn').setAttribute('aria-pressed', lang==='en');
+$('langZh').setAttribute('aria-pressed', lang==='zh');
+$('releaseClose').onclick = () => closeRelease();
+$('release').onclick = event => { if(event.target === $('release')) closeRelease(); };
+$('releaseEn').onclick = () => rememberLang('en');
+$('releaseZh').onclick = () => rememberLang('zh');
+document.addEventListener('keydown', event => { if(event.key === 'Escape' && releaseMode) closeRelease(); });
+$('directoryFind').oninput = () => { directoryQuery = $('directoryFind').value; draw(); };
 window.addEventListener('hashchange', load);
 document.addEventListener('visibilitychange', () => { if(!document.hidden) load(); });
 load();
