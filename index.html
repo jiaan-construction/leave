@@ -48,7 +48,6 @@ h2 span{font-size:14px;font-weight:400;color:var(--ink-faint)}
 .tab-inner{max-width:760px;margin:auto;padding:4px 8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
 .tabs .chip{position:relative;font-size:13px;padding:5px 2px 6px;min-height:64px}
 .tabs .chip[aria-pressed=true]{box-shadow:none;color:var(--brand);background:var(--surface-2)}
-.tab-en{display:block;font-size:10px;font-weight:500;line-height:1.2;margin-bottom:4px}
 .badge{display:inline-block;min-width:15px;padding:0 3px;margin-left:3px;border-radius:8px;background:var(--brand);color:#fff;font-size:10px;line-height:15px;vertical-align:1px}
 .updated{white-space:nowrap;color:var(--ink-soft)}
 .daybar{display:flex;align-items:center;gap:8px}
@@ -163,7 +162,6 @@ button.identity-jump{font-weight:700}
 .release-card li{margin:3px 0;font-size:14px;line-height:1.35}
 .release-entry{margin-top:12px;padding-top:10px;border-top:1px solid var(--rule-soft)}
 .release-entry h3{margin:0;font-size:16px}
-.release-lang{margin-top:12px}
 .release-go{flex:none;width:100%;margin-top:12px;min-height:48px;border:0;border-radius:12px;background:var(--brand);color:#fff;font:600 16px var(--sans);cursor:pointer}
 .foot{display:flex;flex-direction:column;align-items:center;gap:2px}
 .ver{min-height:44px;padding:6px 10px;border:0;background:transparent;color:var(--ink-soft);font:600 13px var(--sans);text-decoration:underline;cursor:pointer}
@@ -176,7 +174,6 @@ button.identity-jump{font-weight:700}
   <p class="sub" id="sub">正在打开…</p>
   <main id="app" hidden>
     <div class="controls">
-      <div class="filters" id="langSwitch" role="group" aria-label="消息语言"><button class="chip" id="langEn" type="button">EN</button><button class="chip" id="langZh" type="button">中文</button></div>
       <div id="coverageJump" class="coverage-jump" hidden>
         <button id="jumpToday" class="action" type="button">今天</button><button id="jumpTomorrow" class="action" type="button">明天</button>
         <label class="date-choice">日历 <input id="coverageDate" type="date"></label>
@@ -194,10 +191,10 @@ button.identity-jump{font-weight:700}
     <div id="list"></div>
     <p class="foot" id="foot"></p>
     <nav class="tabs" aria-label="调度页面"><div class="tab-inner">
-      <button class="chip" id="tToday" type="button"><span class="tab-en" lang="en">Schedule</span>今日排班</button>
-      <button class="chip" id="tGap" type="button"><span class="tab-en" lang="en">Coverage</span>待替班<span class="badge" id="nGap" hidden></span></button>
-      <button class="chip" id="tLeave" type="button"><span class="tab-en" lang="en">Leave</span>休假记录</button>
-      <button class="chip" id="tOperators" type="button"><span class="tab-en" lang="en">Operator Directory</span>司机名册</button>
+      <button class="chip" id="tToday" type="button">今日排班</button>
+      <button class="chip" id="tGap" type="button">待替班<span class="badge" id="nGap" hidden></span></button>
+      <button class="chip" id="tLeave" type="button">休假记录</button>
+      <button class="chip" id="tOperators" type="button">司机名册</button>
     </div></nav>
   </main>
 </div>
@@ -208,10 +205,6 @@ button.identity-jump{font-weight:700}
     <h2 id="releaseTitle"></h2>
     <p class="release-date" id="releaseDate"></p>
     <div id="releaseBody"></div>
-    <div class="filters release-lang" role="group" aria-label="Language">
-      <button class="chip" id="releaseEn" type="button">EN</button>
-      <button class="chip" id="releaseZh" type="button">中文</button>
-    </div>
     <button class="release-go" id="releaseClose" type="button"></button>
   </div>
 </section>
@@ -485,40 +478,57 @@ function releaseNotice(record, seen){
 }
 /* RELEASES_END */
 const RELEASE_RECORD = {"page":"leave","entries":[{"version":"2026.11.28","date":"2026-11-28","notice":"major","kind":"feature","added":{"zh":["第四页改为司机名册","已核实的国籍显示在姓名右边，点国旗可以看到国家名称","排班和休假的消息按当天的情况生成，默认是英文"],"en":["The fourth page is now Operator Directory","A checked nationality shows beside the name. Tap the flag to read the country","Schedule and leave messages follow the day. English is the default"]},"improved":{"zh":["排班行以常用称呼和头像为主，证件姓名放在下面","没有照片时显示姓名首字母","国籍没核实的，不显示国旗"],"en":["A shift row leads with the everyday name and initials. The document name sits underneath","A person without a photo gets initials","No flag appears unless the nationality is checked"]},"fixes":{"zh":[],"en":[]},"highlights":{"zh":["今日排班、待替班、休假记录、司机名册","待替班可以找人，或复制英文消息","国籍只用来认出是谁，不改变排班顺序","有已核号码时可以打电话或发 WhatsApp"],"en":["Schedule, coverage, leave, and the operator directory","Coverage can find a driver, or copy an English message","Nationality is only for recognition. It does not change who is assigned","A checked number can call or open WhatsApp"]}},{"version":"2026.11.27","date":"2026-11-27","notice":"major","kind":"feature","added":{"zh":["司机分成 S Pass、本地司机、替班司机","工地有确认坐标时，点工地名或导航，打开苹果地图驾车路线"],"en":["Drivers are grouped into S Pass, local, and relief","A confirmed site location opens Apple Maps driving directions"]},"improved":{"zh":["没有确认坐标的工地不再打开错误地点"],"en":["A site without a confirmed location no longer opens the wrong place"]},"fixes":{"zh":[],"en":[]},"highlights":{"zh":["今日排班、待替班、休假记录、司机信息库","待替班可以找人，或复制英文邀班","休假可以按日历看即将到来和本月已过的日期","有已核号码时可以打电话或发 WhatsApp"],"en":["Schedule, coverage, leave, and drivers","Coverage can find a driver, or copy an English request","Leave can be checked on a calendar for coming dates and earlier this month","A checked number can call or open WhatsApp"]}}]};
-const SCENE_LABEL = {
-  en: {arrival:'Arrival', upcoming:'Assignment', 'relief-set':'Cover set', 'relief-ask':'Cover ask', 'leave-before':'Before leave', 'leave-during':'On leave', 'leave-sick':'Sick leave', 'leave-return':'Return', 'site-notice':'Site notice'},
-  zh: {arrival:'到岗', upcoming:'上岗安排', 'relief-set':'替班已定', 'relief-ask':'找替班', 'leave-before':'休假前', 'leave-during':'休假中', 'leave-sick':'病假', 'leave-return':'返岗', 'site-notice':'现场通知'}
-};
-function sceneLabel(id){ return (SCENE_LABEL[lang] || SCENE_LABEL.en)[id] || id; }
+const SCENE_LABEL = {arrival:'到岗', upcoming:'上岗安排', 'relief-set':'替班已定', 'relief-ask':'找替班', 'leave-before':'休假前', 'leave-during':'休假中', 'leave-sick':'病假', 'leave-return':'返岗', 'site-notice':'现场通知'};
 async function copyText(text){
-  try{ await navigator.clipboard.writeText(text); toast(lang === 'zh' ? '已复制' : 'Copied'); }
-  catch(e){ prompt(lang === 'zh' ? '复制' : 'Copy', text); }
+  try{ await navigator.clipboard.writeText(text); toast('已复制'); }
+  catch(e){ prompt('复制', text); }
 }
-function composerActions(facts, phone, personName){
+function messageLanguage(kind, nation){
+  return kind === 'notice' || nation === 'CN' ? 'zh' : 'en';
+}
+function recipientNation(name, phone){
+  const matches = (data.operators || []).filter(person =>
+    person.name === name && (!phone || person.phone === phone));
+  return matches.length === 1 ? matches[0].nation : '';
+}
+function composerActions(facts, phone, personName, nation){
+  let language = messageLanguage(facts.kind, nation);
   const scenes = applicableScenes(facts);
   if(!scenes.length){
-    const blocked = composeMessage(facts, detectScene(facts), lang);
+    const blocked = composeMessage(facts, detectScene(facts), 'zh');
     return el('p','hint', blocked.reason);
   }
   let scene = scenes.includes(detectScene(facts)) ? detectScene(facts) : scenes[0];
   const box = el('div','actions');
-  const current = () => composeMessage(facts, scene, lang);
+  const current = () => composeMessage(facts, scene, language);
   if(scenes.length > 1){
     const select = document.createElement('select');
     select.className = 'scene-choice';
-    select.setAttribute('aria-label', lang === 'zh' ? '沟通场景' : 'Message');
+    select.setAttribute('aria-label', '沟通场景');
     for(const id of scenes){
       const option = document.createElement('option');
-      option.value = id; option.textContent = sceneLabel(id);
+      option.value = id; option.textContent = SCENE_LABEL[id];
       if(id === scene) option.selected = true;
       select.append(option);
     }
     select.onchange = () => { scene = select.value; refreshWa(); };
     box.append(select);
   }
-  box.append(action(lang === 'zh' ? '复制' : 'Copy', () => {
+  const languageChoice = document.createElement('select');
+  languageChoice.className = 'scene-choice';
+  languageChoice.setAttribute('aria-label', '本条通知语言');
+  for(const [value, label] of [['zh', '中文消息'], ['en', '英文消息']]){
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    languageChoice.append(option);
+  }
+  languageChoice.value = language;
+  languageChoice.onchange = () => { language = languageChoice.value; refreshWa(); };
+  box.append(languageChoice);
+  box.append(action('复制消息', () => {
     const msg = current();
-    if(!msg.ok){ toast(msg.reason); return; }
+    if(!msg.ok){ toast(composeMessage(facts, scene, 'zh').reason); return; }
     copyText(msg.text);
   }));
   let wa;
@@ -534,7 +544,7 @@ function composerActions(facts, phone, personName){
     if(personName) wa.setAttribute('aria-label', 'WhatsApp ' + personName);
     wa.addEventListener('click', event => {
       const msg = current();
-      if(!msg.ok){ event.preventDefault(); toast(msg.reason); return; }
+      if(!msg.ok){ event.preventDefault(); toast(composeMessage(facts, scene, 'zh').reason); return; }
       const url = new URL(wa.href);
       url.searchParams.set('text', msg.text);
       wa.href = url.href;
@@ -635,11 +645,8 @@ function findRelief(row){
 }
 const LABEL = {ok:'', cover:'顶班', gap:'待替班', open:'没排人', rest:'休', none:'无人'};
 const TABS = {tToday:'today', tGap:'gap', tLeave:'leave', tOperators:'operators'};
-let lang = 'en', ask = null, releaseMode = null, releaseArmed = false;
-const RELEASE_LABEL = {
-  zh: {eyebrow:'更新说明', history:'更新记录', intro:'现在可以用', added:'新增', improved:'优化', fixes:'修复', notice:'公告', close:'知道了', version:'版本 '},
-  en: {eyebrow:"What's New", history:'Updates', intro:'This page can', added:'New', improved:'Changes', fixes:'Fixes', notice:'Notice', close:'Got it', version:'Version '}
-};
+let ask = null, releaseMode = null, releaseArmed = false;
+const RELEASE_LABEL = {eyebrow:'更新说明', history:'更新记录', intro:'现在可以用', added:'新增', improved:'优化', fixes:'修复', notice:'公告', close:'知道了', version:'版本 '};
 function readSeen(){
   try { return seenVersion(localStorage.getItem('jiaan-leave-seen')); }
   catch (e) { return ''; }
@@ -658,8 +665,7 @@ function addReleaseGroup(parent, title, items){
 }
 function renderRelease(){
   const view = releaseNotice(RELEASE_RECORD, readSeen());
-  const language = lang === 'zh' ? 'zh' : 'en';
-  const label = RELEASE_LABEL[language];
+  const label = RELEASE_LABEL;
   const box = $('release');
   if(!releaseMode || !view.current){ box.hidden = true; return; }
   box.hidden = false;
@@ -668,11 +674,9 @@ function renderRelease(){
   $('releaseTitle').textContent = view.current.version;
   $('releaseDate').textContent = view.current.date;
   $('releaseClose').textContent = label.close;
-  $('releaseEn').setAttribute('aria-pressed', language === 'en');
-  $('releaseZh').setAttribute('aria-pressed', language === 'zh');
   const body = $('releaseBody');
   body.replaceChildren();
-  addReleaseGroup(body, label.intro, releaseLines(view.current, language, 'highlights'));
+  addReleaseGroup(body, label.intro, releaseLines(view.current, 'zh', 'highlights'));
   const entries = historyMode ? view.history : [view.current];
   for(const entry of entries){
     const block = historyMode ? el('section', 'release-entry') : body;
@@ -683,9 +687,9 @@ function renderRelease(){
     } else if(view.current.kind === 'notice') {
       body.append(el('p', 'release-kicker', label.notice));
     }
-    addReleaseGroup(block, label.added, releaseLines(entry, language, 'added'));
-    addReleaseGroup(block, label.improved, releaseLines(entry, language, 'improved'));
-    if(historyMode) addReleaseGroup(block, label.fixes, releaseLines(entry, language, 'fixes'));
+    addReleaseGroup(block, label.added, releaseLines(entry, 'zh', 'added'));
+    addReleaseGroup(block, label.improved, releaseLines(entry, 'zh', 'improved'));
+    if(historyMode) addReleaseGroup(block, label.fixes, releaseLines(entry, 'zh', 'fixes'));
     if(historyMode) body.append(block);
   }
 }
@@ -712,8 +716,7 @@ function paintFoot(){
   $('foot').hidden = false;
   $('foot').replaceChildren(document.createTextNode(hint));
   if(!view.current) return;
-  const language = lang === 'zh' ? 'zh' : 'en';
-  const button = el('button', 'ver', RELEASE_LABEL[language].version + view.current.version);
+  const button = el('button', 'ver', RELEASE_LABEL.version + view.current.version);
   button.type = 'button';
   button.onclick = () => openRelease('history');
   $('foot').append(button);
@@ -736,17 +739,16 @@ function flagButton(code){
   const names = NATION_NAME[code];
   const emoji = flagEmoji(code);
   if(!names || !emoji) return null;
-  const language = lang === 'zh' ? 'zh' : 'en';
   const button = el('button', 'flag', emoji);
   button.type = 'button';
-  button.title = names[language];
-  button.setAttribute('aria-label', names[language]);
+  button.title = names.zh;
+  button.setAttribute('aria-label', names.zh);
   button.setAttribute('aria-pressed', 'false');
   button.onclick = event => {
     event.stopPropagation();
     const open = button.getAttribute('aria-pressed') === 'true';
     button.setAttribute('aria-pressed', String(!open));
-    button.textContent = open ? emoji : names[language];
+    button.textContent = open ? emoji : names.zh;
   };
   return button;
 }
@@ -813,7 +815,7 @@ function switchTab(next){
 }
 function drawOperators(list){
   const people = data.operators || [];
-  const labels = {'平桥':'Saddle Jib','上下桥':'Luffing Jib'};
+  const labels = {'平桥':'平臂塔吊','上下桥':'动臂塔吊'};
   if(ask){
     const bar = el('div','ask-bar');
     bar.append(el('span','', '正在问：' + dayName(ask.date) + ' ' + (ask.site || '') + ' ' + (ask.tc || '')));
@@ -842,12 +844,12 @@ function drawOperators(list){
       for(const cert of p.certificates || []) facts.append(el('div','detail', cert));
       const actions = el('div','actions');
       if(p.phone){
-        const call = el('a','call', lang === 'zh' ? '电话' : 'Call');
+        const call = el('a','call', '电话');
         call.href = 'tel:' + p.phone.replace(/[^\d+]/g, '');
         call.setAttribute('aria-label', '打电话给' + (p.name || ''));
         actions.append(call, whatsappLink(p.phone));
       }
-      if(ask) actions.append(composerActions({kind:'relief-ask', today:sg(), date:ask.date, site:ask.site, tc:ask.tc, shift:ask.shift, navigation:ask.navigation, phones:p.phone ? [p.phone] : []}, p.phone || '', p.name));
+      if(ask) actions.append(composerActions({kind:'relief-ask', today:sg(), date:ask.date, site:ask.site, tc:ask.tc, shift:ask.shift, navigation:ask.navigation, phones:p.phone ? [p.phone] : []}, p.phone || '', p.name, p.nation));
       box.append(types, facts, actions);
       section.append(box);
     }
@@ -962,7 +964,7 @@ function drawLeave(list, rows){
     header.append(composerActions({
       kind:'leave', today:sg(), dates:unique, pending, part:parts.size === 1 ? [...parts][0] : '',
       returnDate, returnSlots:returnDate ? dutySlots(name, returnDate) : [], phones:[...phones], reason:''
-    }, phone, name));
+    }, phone, name, recipientNation(name, phone)));
     box.append(header);
     for(const {site,tc,dates:slotDates} of slots.values()){
       const item = el('div','leave-item');
@@ -977,7 +979,7 @@ function drawLeave(list, rows){
             kind:'duty', today:sg(), date, cover:true, covering:name,
             phones:r.rep_phone ? [r.rep_phone] : [],
             slots:[{site, tc, shift:shiftFor(date, site, tc) || r.part || ''}]
-          }, r.rep_phone || '', r.rep));
+          }, r.rep_phone || '', r.rep, recipientNation(r.rep, r.rep_phone)));
         }
         item.append(line);
       }
@@ -1053,14 +1055,14 @@ function slotRow(x, date, site){
     nm.append(composerActions({
       kind:'duty', today:sg(), date, cover:x.state === 'cover', phones:x.phone ? [x.phone] : [],
       slots:slots.length ? slots : [{site, tc:x.tc, shift:x.shift}]
-    }, x.phone || '', x.name));
+    }, x.phone || '', x.name, x.nation));
   }
   row.append(tc, nm);
   if(LABEL[x.state]) row.append(el('span','st', LABEL[x.state]));
   if(x.phone && (x.state === 'ok' || x.state === 'cover')){
-    const call = el('a','call', lang === 'zh' ? '电话' : 'Call');
+    const call = el('a','call', '电话');
     call.href = 'tel:' + x.phone.replace(/[^\d+]/g, '');
-    call.setAttribute('aria-label', 'Call ' + (x.name || ''));
+    call.setAttribute('aria-label', '打电话给' + (x.name || ''));
     row.append(call);
   }
   return row;
@@ -1112,8 +1114,6 @@ function draw(){
   $('nGap').textContent = urgent;
   $('nGap').hidden = !urgent;
   for(const [id,name] of Object.entries(TABS)) $(id).setAttribute('aria-pressed', tab===name);
-  $('langEn').setAttribute('aria-pressed', lang==='en');
-  $('langZh').setAttribute('aria-pressed', lang==='zh');
   $('daybar').hidden = tab !== 'today'; $('when').hidden = tab !== 'leave';
   $('leaveCalendar').hidden = tab !== 'leave';
   $('coverageJump').hidden = tab !== 'gap';
@@ -1165,22 +1165,8 @@ $('jumpTomorrow').onclick = () => jumpCoverage(plus(sg(),1));
 $('coverageDate').onchange = event => jumpCoverage(event.target.value);
 $('wNext').onclick = () => { past = false; leaveDate = ''; leaveMonth = ''; draw(); };
 $('wPast').onclick = () => { past = true; leaveDate = ''; leaveMonth = ''; draw(); };
-function rememberLang(next){
-  lang = next;
-  try{ localStorage.setItem('jiaan-leave-lang', next); }catch(e){}
-  if(data) draw();
-  else { $('langEn').setAttribute('aria-pressed', lang==='en'); $('langZh').setAttribute('aria-pressed', lang==='zh'); }
-  if(releaseMode) renderRelease();
-}
-try{ const saved = localStorage.getItem('jiaan-leave-lang'); if(saved === 'zh' || saved === 'en') lang = saved; }catch(e){}
-$('langEn').onclick = () => rememberLang('en');
-$('langZh').onclick = () => rememberLang('zh');
-$('langEn').setAttribute('aria-pressed', lang==='en');
-$('langZh').setAttribute('aria-pressed', lang==='zh');
 $('releaseClose').onclick = () => closeRelease();
 $('release').onclick = event => { if(event.target === $('release')) closeRelease(); };
-$('releaseEn').onclick = () => rememberLang('en');
-$('releaseZh').onclick = () => rememberLang('zh');
 document.addEventListener('keydown', event => { if(event.key === 'Escape' && releaseMode) closeRelease(); });
 $('directoryFind').oninput = () => { directoryQuery = $('directoryFind').value; draw(); };
 window.addEventListener('hashchange', load);
